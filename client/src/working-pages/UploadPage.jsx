@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import AnswerPanel from "./components/AnswerPanel.jsx";
-import SummaryPanel from "./components/SummaryPanel.jsx";
-import { useExam } from "./Context/ExamContent.jsx";
+import AnswerPanel from "../components/AnswerPanel.jsx";
+import SummaryPanel from "../components/SummaryPanel.jsx";
+import { useExam } from "../Context/ExamContent.jsx";
 import Mainpage from "./Front-Page/mainpage.jsx";
 
 const API_URL =
