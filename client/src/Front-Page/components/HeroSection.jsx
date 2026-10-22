@@ -1,6 +1,13 @@
 import React from 'react'
-
+import {GraduationCap,FileText,FileCheck,Brain,
+  MessageCircle,ArrowRight,Play,Check,Menu,
+  X,Sparkles,UploadCloud,BookOpen,
+  Target,Zap,Link,
+} from "lucide-react";
 const HeroSection = () => {
+  const  handleClick = () => {
+    console.log("clicked");
+  }
   return (
     <section
         id="home"
@@ -68,7 +75,7 @@ className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3.5 font-s
           </div>
 
           {/* Hero Visual */}
-          <HeroIllustration />
+          
         </div>
       </section>
   )

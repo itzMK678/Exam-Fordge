@@ -9,6 +9,7 @@ import UploadPage from './working-pages/UploadPage.jsx';
 function App() {
   return (
     <Routes>
+    
       <Route path="/" element={<Mainpage />} />
       <Route path="/login" element={<Login/>} />
       <Route path="/signup" element={<Signup/>} />
