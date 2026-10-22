@@ -2,7 +2,7 @@ import React from 'react'
 import { GraduationCap } from 'lucide-react'
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 px-5 py-10 text-white">
+    <footer className="bg-slate-950 px-5 pt-10 text-white">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 text-center md:flex-row md:text-left">
           <a
             href="#home"
@@ -35,7 +35,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 pt-6 text-center text-xs text-slate-500">
+        <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 py-2 text-center text-xs text-slate-500">
           © {new Date().getFullYear()} ExamForge. All rights reserved.
         </div>
       </footer>

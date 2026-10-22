@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import AnswerPanel from "../components/AnswerPanel.jsx";
 import SummaryPanel from "../components/SummaryPanel.jsx";
 import { useExam } from "../Context/ExamContent.jsx";
-import Mainpage from "./Front-Page/mainpage.jsx";
+import Mainpage from "../Front-Page/Mainpage.jsx";
 
 const API_URL =
   import.meta.env.VITE_API_URL ||
