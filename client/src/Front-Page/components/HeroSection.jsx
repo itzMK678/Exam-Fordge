@@ -4,6 +4,7 @@ import {GraduationCap,FileText,FileCheck,Brain,
   X,Sparkles,UploadCloud,BookOpen,
   Target,Zap,Link,
 } from "lucide-react";
+import HeroGraphic from './HeroGraphic';
 const HeroSection = () => {
   const  handleClick = () => {
     console.log("clicked");
@@ -75,7 +76,7 @@ className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3.5 font-s
           </div>
 
           {/* Hero Visual */}
-          
+          <HeroGraphic/>
         </div>
       </section>
   )

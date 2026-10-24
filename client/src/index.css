@@ -28,3 +28,20 @@ textarea,
 select {
   font: inherit;
 }
+
+module.exports = {
+  theme: {
+    extend: {
+      animation: {
+        'spin-slow': 'spin 25s linear infinite',
+        'counter-rotate': 'counterRotate 25s linear infinite',
+      },
+      keyframes: {
+        counterRotate: {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
+        },
+      },
+    },
+  },
+};
