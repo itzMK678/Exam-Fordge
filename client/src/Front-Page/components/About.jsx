@@ -141,27 +141,7 @@ const About = () => {
         </div>
 
         {/* Bottom Highlight */}
-        <div className="mt-20 rounded-3xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-10 text-center text-white sm:px-12 sm:py-14">
-          <Brain size={38} className="mx-auto mb-5" />
-
-          <h3 className="text-2xl font-bold sm:text-3xl">
-            Your Learning. Your Materials. Your Progress.
-          </h3>
-
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-indigo-100">
-            Make every study session more focused with tools designed to help
-            you understand your material, practice effectively, and prepare
-            for your next exam.
-          </p>
-
-          <a
-            href="/signup"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-indigo-700 transition hover:bg-indigo-50"
-          >
-            Get Started
-            <ArrowRight size={18} />
-          </a>
-        </div>
+       
       </div>
     </section>
   );

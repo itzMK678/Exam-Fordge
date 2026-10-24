@@ -17,13 +17,10 @@ const mainpage = () => {
   return (
     <>
       <Navbar />
-      
-         <HeroSection/>
-      <About/>
-     
+      <HeroSection/>
       <Feature/>
+      <About/>
       <WorkGuide/>
-       
       <Footer />
     </>
   )
