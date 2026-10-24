@@ -1,5 +1,5 @@
 import React from 'react'
-
+import { Link } from 'react-router-dom';
 import {Brain,ArrowRight,UploadCloud,
   Target,
 } from "lucide-react";
@@ -86,12 +86,13 @@ const WorkGuide = () => {
           </p>
 
           <a
-            href="/signup"
+            href="/"
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-indigo-700 transition hover:bg-indigo-50"
           >
             Get Started
             <ArrowRight size={18} />
           </a>
+          <Link to="/work" className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-semibold text-indigo-700 transition hover:bg-indigo-50"></Link>
         </div>
     </div>
   )
