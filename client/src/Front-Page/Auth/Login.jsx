@@ -6,17 +6,30 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  const data = new FormData(e.target);
+  const email = data.get("email");
+  const password = data.get("password");
+  try {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Receives and stores httpOnly cookie
+      body: JSON.stringify({ email, password }),
     });
-
-    // Connect your login API here.
-  };
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Failed to log in.");
+    // Redirect to /work upon successful login
+    navigate("/work");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">

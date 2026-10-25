@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   UserRound,
   Mail,
@@ -16,30 +17,39 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError("");
 
-    const data = new FormData(e.target);
-    const name = data.get("name");
-    const email = data.get("email");
-    const password = data.get("password");
-    const confirmPassword = data.get("confirmPassword");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must contain at least 8 characters.");
-      return;
-    }
-
-    console.log({ name, email, password });
-
-    // Connect your signup API here.
-  };
+const [loading, setLoading] = useState(false);
+const navigate = useNavigate();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  const data = new FormData(e.target);
+  const name = data.get("name");
+  const email = data.get("email");
+  const password = data.get("password");
+  const confirmPassword = data.get("confirmPassword");
+  if (password !== confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
+  setLoading(true);
+  try {
+    const res = await fetch(`${API_URL}/api/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // Receives and stores httpOnly cookie
+      body: JSON.stringify({ name, email, password }),
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || "Failed to create account.");
+    // Redirect to /work upon successful registration
+    navigate("/work");
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">
