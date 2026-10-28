@@ -28,7 +28,7 @@ textarea,
 select {
   font: inherit;
 }
-
+/* 
 module.exports = {
   theme: {
     extend: {
@@ -44,4 +44,4 @@ module.exports = {
       },
     },
   },
-};
+}; */
