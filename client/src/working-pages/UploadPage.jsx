@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -294,6 +294,38 @@ export default function UploadPage({ onExamGenerated }) {
       if (data.data) {
         setGeneratedExam(data.data);
         if (onExamGenerated) onExamGenerated(data.data);
+
+        // ---- Auto-save exam to backend history ----
+        try {
+          const exam = data.data;
+          const docNames = exam.documents?.map((d) => d.filename) || [];
+          fetch(`${API_URL}/api/history/exams`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              title: docNames.join(" + ") || "Exam",
+              difficulty: exam.difficulty,
+              focusTopics: exam.focusTopics,
+              totalQuestions: exam.totalQuestions,
+              documentNames: docNames,
+              questions: exam.questions,
+            }),
+          }).then(async (r) => {
+            if (r.ok) {
+              const saved = await r.json();
+              // Store the exam session ID for linking discussions later
+              if (saved?.data?.id) {
+                localStorage.setItem("examforge_current_exam_id", saved.data.id);
+              }
+            }
+          }).catch(() => {
+            // Silently fail -- user may not be logged in, exam still works locally
+          });
+        } catch {
+          // Non-blocking: local exam still works
+        }
+
         return;
       }
 
@@ -401,6 +433,15 @@ export default function UploadPage({ onExamGenerated }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 print:bg-white">
+      <nav className="print:hidden border-b border-slate-200 bg-white px-6 py-3 flex items-center justify-between shadow-sm">
+        <span className="text-sm font-black text-indigo-700">ExamForge</span>
+        <a
+          href="/history"
+          className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
+        >
+          📋 My Exam History
+        </a>
+      </nav>
       <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
         {/* ==================================================
             HERO HEADER

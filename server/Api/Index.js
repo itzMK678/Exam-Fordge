@@ -11,6 +11,7 @@ import summaryRoutes from "../routes/summary.routes.js";
 import discussionRoutes from "../routes/discussion.route.js";
 import authRoutes from "../routes/auth.route.js";
 import workRoutes from "../routes/work.route.js";
+import historyRoutes from "../routes/history.route.js";
 
 import { errorMiddleware } from "../middleware/error.middleware.js";
 
@@ -58,6 +59,7 @@ app.use("/api/documents", summaryRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/exams", discussionRoutes);
 app.use("/api/exams", examRoutes);
+app.use("/api/history", historyRoutes);
 
 // --------------------------------------------------
 // Protected /work Route

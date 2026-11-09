@@ -4,6 +4,7 @@ const requiredEnv = [
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
   "GEMINI_API_KEY",
+  "ENCRYPTION_SECRET",
   // "REDIS_URL", // [COMMENTED OUT FOR VERCEL] Redis is optional in serverless mode
 ];
 
@@ -51,4 +52,6 @@ export const env = {
   chunkOverlap: Number(process.env.CHUNK_OVERLAP || 75),
 
   maxRAGWords: Number(process.env.MAX_RAG_WORDS || 35000),
+
+  encryptionSecret: process.env.ENCRYPTION_SECRET,
 };

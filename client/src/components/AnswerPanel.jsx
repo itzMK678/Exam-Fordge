@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import { useExam } from "../Context/ExamContent";
 import MarkdownRenderer from "./MarkdownRenderer.jsx";
 
@@ -144,6 +144,29 @@ function AnswerPanel() {
       }
 
       updateLastDiscussionMessage(targetQuestion, data.message);
+
+      // ---- Persist discussion to backend ----
+      try {
+        const examId = localStorage.getItem("examforge_current_exam_id");
+        if (examId) {
+          const finalMessages = [
+            ...updatedMessages,
+            { role: "assistant", content: data.message },
+          ];
+          fetch(`${API_URL}/api/history/exams/${examId}/discussions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              questionUid: targetQuestion.uid || String(targetQuestion.id),
+              questionText: targetQuestion.question,
+              messages: finalMessages,
+            }),
+          }).catch(() => {}); // Non-blocking
+        }
+      } catch {
+        // Non-blocking
+      }
     } catch (error) {
       if (error.name === "AbortError") return;
       console.error("Discussion error:", error);
