@@ -28,6 +28,8 @@ export const env = {
   pythonWorkerUrl:
     process.env.PYTHON_WORKER_URL || "http://127.0.0.1:8000",
 
+    ENCRYPTION_SECRET: process.env.ENCRYPTION_SECRET,
+
   geminiApiKey: process.env.GEMINI_API_KEY,
 
   geminiEmbeddingModel:
