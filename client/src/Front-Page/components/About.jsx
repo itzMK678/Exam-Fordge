@@ -52,10 +52,7 @@ const About = () => {
       <div className="relative mx-auto max-w-7xl">
         {/* Section Heading */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700">
-            <Sparkles size={16} />
-            About ExamForge
-          </span>
+         
 
           <h2 className="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
             Study Smarter with Your

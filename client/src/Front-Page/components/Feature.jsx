@@ -113,13 +113,7 @@ const Feature = () => {
                     {feature.description}
                   </p>
 
-                  <div className="mt-5 flex items-center gap-2 text-sm font-semibold text-blue-600">
-                    Explore feature
-                    <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </div>
+                  
                 </div>
               );
             })}

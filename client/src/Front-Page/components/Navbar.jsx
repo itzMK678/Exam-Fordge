@@ -14,7 +14,7 @@ const Navbar = () => {
     ["Home", "#home"],
     ["Features", "#features"],
     ["About", "#about"],
-    ["How It Works", "#how-it-works"],
+    ["How It Works", "#How-work"],
   ];
 
   const closeMenu = () => setMenuOpen(false);

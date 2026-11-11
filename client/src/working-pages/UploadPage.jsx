@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
+import Navbar from "../Front-Page/components/Navbar";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -433,24 +434,19 @@ export default function UploadPage({ onExamGenerated }) {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 print:bg-white">
-      <nav className="print:hidden border-b border-slate-200 bg-white px-6 py-3 flex items-center justify-between shadow-sm">
-        <span className="text-sm font-black text-indigo-700">ExamForge</span>
-        <a
+     <Navbar/>
+       <a
           href="/history"
           className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
         >
           📋 My Exam History
         </a>
-      </nav>
       <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
         {/* ==================================================
             HERO HEADER
         ================================================== */}
         <section className="mb-10 text-center print:hidden">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3.5 py-1 text-xs font-bold text-indigo-700">
-            <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse" />
-            ExamForge AI Generator
-          </div>
+         
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
             Create exams <br />
             <span className="text-indigo-600">from your documents & PDFs</span>

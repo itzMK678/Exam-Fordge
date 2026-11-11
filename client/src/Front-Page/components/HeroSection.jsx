@@ -17,10 +17,7 @@ const HeroSection = () => {
         <div className="mx-auto grid max-w-7xl items-center gap-8 px-5 py-14 sm:py-20 lg:grid-cols-2 lg:gap-12 lg:px-8 lg:py-20">
           {/* Hero Content */}
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm">
-              <Sparkles size={16} />
-              AI-Powered Learning Platform
-            </div>
+           
 
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
               Turn Your Study Materials Into{" "}
@@ -37,23 +34,17 @@ const HeroSection = () => {
               id="get-started"
               className="mt-8 flex flex-wrap gap-4"
             >
-              <a
-                href="#features"
-                
+              
+            
+               <a
+                href="/work"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-[#155dfc] text-black px-6 py-3.5 font-semibold  transition hover:border-white hover:text-white"
               >
                 
-                
+                Try it 
               </a>
-              <button onClick={handleClick}> work</button>
-<Link to= "/work" 
-
-className="inline-flex items-center gap-2 rounded-xl bg-black px-6 py-3.5 font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:-translate-y-0.5 hover:bg-blue-700">
-                Get Started Free
-              </Link>
-
-              
               <a
-                href="#how-it-works"
+                href="#how-work"
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-600"
               >
                 <Play size={16} fill="currentColor" />

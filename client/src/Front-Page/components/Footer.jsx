@@ -17,22 +17,7 @@ const Footer = () => {
             Learn smarter. Practice better. Achieve more.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-5 text-sm text-slate-400">
-            <a href="#features" className="transition hover:text-white">
-              Features
-            </a>
-
-            <a href="#about" className="transition hover:text-white">
-              About
-            </a>
-
-            <a
-              href="#how-it-works"
-              className="transition hover:text-white"
-            >
-              How It Works
-            </a>
-          </div>
+          
         </div>
 
         <div className="mx-auto mt-8 max-w-7xl border-t border-slate-800 py-2 text-center text-xs text-slate-500">
