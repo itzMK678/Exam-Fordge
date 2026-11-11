@@ -1,4 +1,13 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load .env from server directory and project root directory
+dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const requiredEnv = [
   "SUPABASE_URL",
@@ -43,7 +52,7 @@ export const env = {
     process.env.GEMINI_GENERATION_MODEL || "gemini-flash-lite-latest",
 
   geminiFallbackModel:
-    process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash",
+    process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash-lite",
 
   maxConcurrentGeminiRequests: Number(
     process.env.MAX_CONCURRENT_GEMINI_REQUESTS || 2
@@ -56,4 +65,6 @@ export const env = {
   maxRAGWords: Number(process.env.MAX_RAG_WORDS || 35000),
 
   encryptionSecret: process.env.ENCRYPTION_SECRET,
+
+  jwtSecret: process.env.JWT_SECRET || "super_secret_jwt_key_123!",
 };

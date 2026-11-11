@@ -1,7 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   UserRound,
   Mail,
@@ -12,44 +10,47 @@ import {
   UserPlus,
 } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    const data = new FormData(e.target);
+    const name = data.get("name");
+    const email = data.get("email");
+    const password = data.get("password");
+    const confirmPassword = data.get("confirmPassword");
 
-const [loading, setLoading] = useState(false);
-const navigate = useNavigate();
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  const data = new FormData(e.target);
-  const name = data.get("name");
-  const email = data.get("email");
-  const password = data.get("password");
-  const confirmPassword = data.get("confirmPassword");
-  if (password !== confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
-  setLoading(true);
-  try {
-    const res = await fetch(`${API_URL}/api/auth/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // Receives and stores httpOnly cookie
-      body: JSON.stringify({ name, email, password }),
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "Failed to create account.");
-    // Redirect to /work upon successful registration
-    navigate("/work");
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // Receives and stores httpOnly cookie
+        body: JSON.stringify({ name, email, password }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to create account.");
+      // Redirect to /work upon successful registration
+      navigate("/work");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">
@@ -163,9 +164,10 @@ const handleSubmit = async (e) => {
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-500"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
             >
-              Create Account <ArrowRight size={18} />
+              {loading ? "Creating Account..." : "Create Account"} <ArrowRight size={18} />
             </button>
           </form>
 
