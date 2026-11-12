@@ -11,10 +11,10 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
-    ["Home", "#home"],
-    ["Features", "#features"],
-    ["About", "#about"],
-    ["How It Works", "#How-work"],
+    ["Home", "/#home"],
+    ["Features", "/#features"],
+    ["About", "/#about"],
+    ["How It Works", "/#How-work"],
   ];
 
   const closeMenu = () => setMenuOpen(false);
@@ -23,7 +23,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-lg">
       <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
         <a
-          href="#home"
+          href="/"
           onClick={closeMenu}
           className="flex items-center gap-2 text-2xl font-extrabold text-slate-900"
         >

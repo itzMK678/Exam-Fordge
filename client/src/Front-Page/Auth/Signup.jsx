@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  GraduationCap,
   UserRound,
   Mail,
   Lock,
@@ -38,12 +40,15 @@ export default function Signup() {
       const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Receives and stores httpOnly cookie
+        credentials: "include",
         body: JSON.stringify({ name, email, password }),
       });
+
       const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to create account.");
-      // Redirect to /work upon successful registration
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to create account.");
+      }
+
       navigate("/work");
     } catch (err) {
       setError(err.message);
@@ -53,26 +58,62 @@ export default function Signup() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white">
+    <main className="min-h-screen flex items-center justify-center px-4 py-10 bg-white">
+      <div className="w-full max-w-[900px] bg-gradient-to-r from-[#fcfdfe] to-[#f2f7fe] flex border border-blue-500 rounded-2xl">
+
+        {/* Left Section */}
+        <div className="relative w-1/2 text-center p-8 flex flex-col justify-center">
+        <div> 
+          <a
+          href="/"
+         
+          className=" absolute z-4 -top-8 left-1 flex items-center gap-2 text-2xl font-extrabold text-slate-900"
+        >
+          <span className="rounded-xl bg-blue-600 p-2 text-white">
+            <GraduationCap size={30} />
+          </span>
+          Exam<span className="text-blue-600">Forge</span>
+        </a></div>
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#155dfc] text-white">
             <UserPlus size={28} />
           </div>
-          <h1 className="text-3xl font-bold text-white">Create Account</h1>
-          <p className="mt-2 text-slate-400">
-            Join us and get started today
+
+          <h1 className="text-3xl font-bold text-[#155dfc]">
+            Create Account
+          </h1>
+
+          <p className="mt-2 text-slate-700">
+            Join us and get started today. Create your account to access
+            exams, quizzes, and other learning resources.
+          </p>
+
+          <p className="mt-7 text-center text-sm text-black">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-indigo-400 hover:text-indigo-300"
+            >
+              Sign in
+            </Link>
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
+        {/* Right Section */}
+        <div className="w-1/2 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Full Name */}
             <div>
               <label htmlFor="name" className="mb-2 block text-sm text-slate-200">
                 Full Name
               </label>
+
               <div className="relative">
-                <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
+                <UserRound
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={19}
+                />
+
                 <input
                   id="name"
                   name="name"
@@ -85,12 +126,18 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Email */}
             <div>
               <label htmlFor="email" className="mb-2 block text-sm text-slate-200">
                 Email Address
               </label>
+
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={19}
+                />
+
                 <input
                   id="email"
                   name="email"
@@ -103,12 +150,18 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Password */}
             <div>
               <label htmlFor="password" className="mb-2 block text-sm text-slate-200">
                 Password
               </label>
+
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={19}
+                />
+
                 <input
                   id="password"
                   name="password"
@@ -119,6 +172,7 @@ export default function Signup() {
                   required
                   className="w-full rounded-xl border border-slate-700 bg-slate-950 py-3 pl-11 pr-12 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -130,12 +184,18 @@ export default function Signup() {
               </div>
             </div>
 
+            {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="mb-2 block text-sm text-slate-200">
                 Confirm Password
               </label>
+
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={19} />
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                  size={19}
+                />
+
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -145,6 +205,7 @@ export default function Signup() {
                   required
                   className="w-full rounded-xl border border-slate-700 bg-slate-950 py-3 pl-11 pr-12 text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -167,21 +228,11 @@ export default function Signup() {
               disabled={loading}
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-50"
             >
-              {loading ? "Creating Account..." : "Create Account"} <ArrowRight size={18} />
+              {loading ? "Creating Account..." : "Create Account"}
+              <ArrowRight size={18} />
             </button>
           </form>
-
-          <p className="mt-7 text-center text-sm text-slate-400">
-            Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-indigo-400 hover:text-indigo-300">
-              Sign in
-            </Link>
-          </p>
         </div>
-
-        <p className="mt-6 text-center text-xs text-slate-600">
-          © 2026 Your App. All rights reserved.
-        </p>
       </div>
     </main>
   );

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
+import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
+
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -37,19 +38,39 @@ export default function Login() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white">
+    <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-10 bg-white ">
+      <div className="w-full max-w-[900px] bg-gradient-to-r from-[#fcfdfe] to-[#f2f7fe] flex border border-blue-500 rounded-2xl">
+       
+        <div className="relative w-1/2 text-center mb-8 p-8">
+        
+<div> 
+          <a
+          href="/"
+         
+          className=" absolute z-4 -top-8 left-1 flex items-center gap-2 text-2xl font-extrabold text-slate-900"
+        >
+          <span className="rounded-xl bg-blue-600 p-2 text-white">
+            <GraduationCap size={30} />
+          </span>
+          Exam<span className="text-blue-600">Forge</span>
+        </a></div>
+        
+          <div className="mx-auto mb-4 flex h-14 w-14 max-w-[px-200] items-center justify-center rounded-2xl bg-[#155dfc] text-white">
             <LogIn size={28} />
           </div>
-          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="mt-2 text-slate-400">
-            Sign in to continue to your account
+          <h1 className="text-3xl font-bold text-[#155dfc]">Welcome Back</h1>
+          <p className="mt-2 text-slate-700">
+            Sign in to continue to your account and acess your past exams, quizzes, and other resources.
+          </p>
+           <p className="mt-7 text-center text-sm text-black">
+            Don't have an account?{" "}
+            <Link to="/signup" className="font-semibold text-indigo-400 hover:text-indigo-300">
+              Create account
+            </Link>
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
+        <div className="w-1/2 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="mb-2 block text-sm text-slate-200">
@@ -121,17 +142,12 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="mt-7 text-center text-sm text-slate-400">
-            Don't have an account?{" "}
-            <Link to="/signup" className="font-semibold text-indigo-400 hover:text-indigo-300">
-              Create account
-            </Link>
-          </p>
+         
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-600">
+        {/* <p className="mt-6 text-center text-xs text-slate-600">
           © 2026 Your App. All rights reserved.
-        </p>
+        </p> */}
       </div>
     </main>
   );
