@@ -1,6 +1,8 @@
 ﻿import React, { useState, useEffect } from "react";
 import Navbar from "../Front-Page/components/Navbar";
-
+import SummaryPanel from "../components/SummaryPanel";
+import { useExam } from "../Context/ExamContent";
+import AnswerPanel from "../components/AnswerPanel";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // =========================================================================
@@ -11,24 +13,14 @@ export default function UploadPage({ onExamGenerated }) {
   // EXAM STATE (Self-contained, no external context required)
   // -----------------------------------------------------------------------
   const [generatedExam, setGeneratedExam] = useState(null);
-  const [activeAnswerQuestion, setActiveAnswerQuestion] = useState(null);
-  const [isAnswerPanelOpen, setIsAnswerPanelOpen] = useState(false);
+  const {
+  openAnswerPanel,
+} = useExam();
 
-  const clearExam = () => {
-    setGeneratedExam(null);
-    setActiveAnswerQuestion(null);
-    setIsAnswerPanelOpen(false);
-  };
-
-  const openAnswerPanel = (question) => {
-    setActiveAnswerQuestion(question);
-    setIsAnswerPanelOpen(true);
-  };
-
-  const closeAnswerPanel = () => {
-    setIsAnswerPanelOpen(false);
-    setActiveAnswerQuestion(null);
-  };
+const clearExam = () => {
+  setGeneratedExam(null);
+};
+  
 
   // -----------------------------------------------------------------------
   // FILE & FORM STATE
@@ -437,9 +429,9 @@ export default function UploadPage({ onExamGenerated }) {
      <Navbar/>
        <a
           href="/history"
-          className="text-xs font-semibold text-indigo-600 hover:underline flex items-center gap-1"
+          className=" sticky top-20 z-50  text-xs w-fit ml-2 mt-2 rounded-lg font-semibold text-white  hover:underline flex items-center gap-1 bg-black p-3"
         >
-          📋 My Exam History
+           See your whole History
         </a>
       <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
         {/* ==================================================
@@ -796,12 +788,12 @@ export default function UploadPage({ onExamGenerated }) {
             ) : loading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>Generating questions with Gemini...</span>
+                <span>Generating questions ...</span>
               </>
             ) : (
               <>
                 <span>Generate Exam</span>
-                <span className="text-lg">→</span>
+                
               </>
             )}
           </button>
@@ -968,22 +960,17 @@ export default function UploadPage({ onExamGenerated }) {
       {/* ==================================================
           INLINE ANSWER PANEL / DRAWER
       ================================================== */}
-      {isAnswerPanelOpen && activeAnswerQuestion && (
-        <AnswerPanelModal
-          question={activeAnswerQuestion}
-          onClose={closeAnswerPanel}
-        />
-      )}
+     
+      <AnswerPanel/>
 
       {/* ==================================================
           INLINE SUMMARY PANEL / MODAL
       ================================================== */}
-      {isSummaryOpen && selectedDocument && (
-        <SummaryPanelModal
-          document={selectedDocument}
-          onClose={closeSummary}
-        />
-      )}
+      <SummaryPanel
+  document={selectedDocument}
+  isOpen={isSummaryOpen}
+  onClose={closeSummary}
+/>
     </div>
   );
 }
@@ -1011,160 +998,4 @@ function QuestionType({ title, description, value, onChange }) {
 }
 
 // INLINE ANSWER & TUTOR MODAL
-function AnswerPanelModal({ question, onClose }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
-      <div className="relative h-full w-full max-w-lg bg-white shadow-2xl flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 p-5">
-          <div>
-            <span className="rounded bg-indigo-50 px-2 py-0.5 text-[11px] font-bold uppercase text-indigo-600 border border-indigo-100">
-              {question.type}
-            </span>
-            <h3 className="mt-1 font-bold text-slate-900 text-lg">
-              Answer & Explanation
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          >
-            ✕
-          </button>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-            <p className="text-xs font-bold uppercase text-slate-400">Question</p>
-            <p className="mt-1 text-sm font-medium text-slate-800">
-              {question.question}
-            </p>
-          </div>
-
-          {question.correctAnswer && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-              <p className="text-xs font-bold uppercase text-emerald-700">
-                Correct Answer
-              </p>
-              <p className="mt-1 text-sm font-bold text-emerald-900">
-                {question.correctAnswer}
-              </p>
-            </div>
-          )}
-
-          {question.answer && !question.correctAnswer && (
-            <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
-              <p className="text-xs font-bold uppercase text-indigo-700">
-                Model Solution
-              </p>
-              <p className="mt-1 text-sm text-slate-800 whitespace-pre-line">
-                {question.answer}
-              </p>
-            </div>
-          )}
-
-          {question.explanation && (
-            <div>
-              <p className="text-xs font-bold uppercase text-slate-400">
-                Detailed Explanation
-              </p>
-              <p className="mt-1 text-sm leading-relaxed text-slate-700 whitespace-pre-line">
-                {question.explanation}
-              </p>
-            </div>
-          )}
-
-          {question.sourcePages?.length > 0 && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-3">
-              <span>📖 Document Citations:</span>
-              <span className="font-semibold text-slate-700">
-                Page {question.sourcePages.join(", ")}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-slate-100 p-4 text-right">
-          <button
-            onClick={onClose}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// INLINE DOCUMENT SUMMARY MODAL
-function SummaryPanelModal({ document, onClose }) {
-  const words = document.word_count ?? document.wordCount ?? 0;
-  const pages = document.page_count ?? 1;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
-      <div className="relative w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="font-bold text-slate-900 text-lg">
-              {document.filename || "Document Summary"}
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {Number(words).toLocaleString()} words • {pages}{" "}
-              {pages === 1 ? "page" : "pages"}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="mt-4 max-h-[60vh] overflow-y-auto space-y-4 text-sm text-slate-700">
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Executive Summary
-            </h4>
-            <p className="leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-              {document.summary ||
-                "This document has been indexed and analyzed by ExamForge. Its content is ready to be used as context for verified question generation with full page citations."}
-            </p>
-          </div>
-
-          {document.topics?.length > 0 && (
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                Identified Key Topics
-              </h4>
-              <div className="flex flex-wrap gap-1.5">
-                {document.topics.map((t, idx) => (
-                  <span
-                    key={idx}
-                    className="rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 border border-indigo-100"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-end border-t border-slate-100 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-indigo-700"
-          >
-            Done
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}

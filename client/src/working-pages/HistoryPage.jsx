@@ -151,9 +151,9 @@ export default function HistoryPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate("/work")}
-            className="text-sm font-semibold text-indigo-600 hover:underline"
+            className=" p-3 bg-indigo-600 text-sm font-semibold text-white rounded-lg hover:bg-red-600 transition"
           >
-            ← Back to Generator
+             Back to Generator
           </button>
           <span className="text-slate-300">|</span>
           <h1 className="text-lg font-black text-slate-900">My Exam History</h1>

@@ -49,7 +49,7 @@ export const env = {
   ),
 
   geminiGenerationModel:
-    process.env.GEMINI_GENERATION_MODEL || "gemini-flash-lite-latest",
+    process.env.GEMINI_GENERATION_MODEL || "gemini-3.5-flash",
 
   geminiFallbackModel:
     process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash-lite",

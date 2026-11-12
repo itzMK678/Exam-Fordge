@@ -7,9 +7,10 @@ import Signup from './Front-Page/Auth/Signup.jsx';
 import UploadPage from './working-pages/UploadPage.jsx';
 import ProtectedRoute from './working-pages/ProtectedRoute.jsx';
 import HistoryPage from './working-pages/HistoryPage.jsx';
-
+import { ExamProvider } from "./Context/ExamContent";
 function App() {
   return (
+      <ExamProvider>
     <Routes>
       <Route path="/" element={<Mainpage />} />
       <Route path="/login" element={<Login />} />
@@ -19,6 +20,7 @@ function App() {
       <Route path="/work" element={<UploadPage />} />
       <Route path="/history" element={<HistoryPage />} />
     </Routes>
+    </ExamProvider>
   );
 }
 
