@@ -241,8 +241,8 @@ export default function HistoryPage() {
         <div className="w-80 shrink-0 border-r border-slate-200 bg-slate-50/60 overflow-y-auto">
           {!selectedExam && (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
-              <div className="text-4xl mb-3">👈</div>
-              <p className="text-sm text-slate-400">Select an exam to view its questions</p>
+              
+              <p className="text-sm text-slate-400">Selected Exam's Questions will be shown here </p>
             </div>
           )}
 
@@ -298,9 +298,9 @@ export default function HistoryPage() {
         <div className="flex-1 overflow-y-auto bg-white">
           {!selectedQuestion && (
             <div className="flex flex-col items-center justify-center h-full text-center px-10">
-              <div className="text-4xl mb-3">💬</div>
+              
               <p className="text-sm text-slate-400">
-                Select a question to view the answer and AI tutor chat history
+                Selected Question's answer and chat history will be shown herex
               </p>
             </div>
           )}

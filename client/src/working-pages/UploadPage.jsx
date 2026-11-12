@@ -733,7 +733,7 @@ const clearExam = () => {
           <section className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 print:hidden">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-emerald-900 text-sm flex items-center gap-2">
-                <span>✓</span> Processed Documents ({processedDocuments.length})
+                 Last Uploaded Processed Documents ({processedDocuments.length})
               </h3>
             </div>
 

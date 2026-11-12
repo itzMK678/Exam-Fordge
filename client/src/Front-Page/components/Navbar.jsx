@@ -67,14 +67,15 @@ const Navbar = () => {
             >
               Login
             </Link>
-
-            <a
-              href="#get-started"
+<Link
+              to="/work"
+           
               onClick={closeMenu}
               className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
             >
               Get Started
-            </a>
+            
+            </Link>
           </div>
         </div>
       </nav>
