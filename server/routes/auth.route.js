@@ -1,6 +1,8 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { supabase } from "../services/supabase.service.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -13,9 +15,6 @@ const COOKIE_OPTIONS = {
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
-
-// Database placeholder (replace with User model)
-const users = [];
 
 // ===================================================
 // POST /api/auth/signup
@@ -31,41 +30,85 @@ router.post("/signup", async (req, res) => {
       });
     }
 
-    const existingUser = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (existingUser) {
+    const trimmedName = String(name).trim();
+    const normalizedEmail = String(email).trim().toLowerCase();
+
+    // 1. Check if user already exists in public.users table (if table exists)
+    const { data: existingPublicUser } = await supabase
+      .from("users")
+      .select("id, email")
+      .ilike("email", normalizedEmail)
+      .maybeSingle();
+
+    if (existingPublicUser) {
       return res.status(409).json({
         success: false,
         message: "An account with this email already exists.",
       });
     }
 
-    // Hash password
+    // 2. Generate a unique ID for each user
+    const userId = crypto.randomUUID();
+
+    // 3. Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = {
-      id: `user_${Date.now()}`,
-      name,
-      email: email.toLowerCase(),
+    // 4. Save to public.users table in Supabase
+    const { error: insertError } = await supabase.from("users").insert({
+      id: userId,
+      name: trimmedName,
+      email: normalizedEmail,
       password: hashedPassword,
-      createdAt: new Date(),
-    };
-    users.push(newUser);
+      created_at: new Date().toISOString(),
+    });
 
-    // Generate JWT token
+    if (insertError) {
+      if (insertError.code === "23505") {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists.",
+        });
+      }
+      // If code is PGRST205 (table doesn't exist yet), we log and continue to Supabase Auth
+      if (insertError.code !== "PGRST205") {
+        console.error("Error inserting into public.users:", insertError);
+      }
+    }
+
+    // 5. Also save in Supabase Auth (auth.users)
+    const { error: authError } = await supabase.auth.admin.createUser({
+      id: userId,
+      email: normalizedEmail,
+      password: password,
+      user_metadata: { name: trimmedName },
+      email_confirm: true,
+    });
+
+    if (authError) {
+      const errMsg = authError.message?.toLowerCase() || "";
+      if (errMsg.includes("already") || authError.code === "email_exists") {
+        return res.status(409).json({
+          success: false,
+          message: "An account with this email already exists.",
+        });
+      }
+    }
+
+    // 6. Generate JWT token
     const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, name: newUser.name },
+      { id: userId, email: normalizedEmail, name: trimmedName },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send HTTP-Only Cookie
+    // 7. Send HTTP-Only Cookie
     res.cookie("auth_token", token, COOKIE_OPTIONS);
 
     return res.status(201).json({
       success: true,
       message: "Account created successfully.",
-      user: { id: newUser.id, name: newUser.name, email: newUser.email },
+      user: { id: userId, name: trimmedName, email: normalizedEmail },
     });
   } catch (error) {
     return res.status(500).json({
@@ -89,36 +132,68 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
+    const normalizedEmail = String(email).trim().toLowerCase();
+    let authenticatedUser = null;
+
+    // 1. Try matching from public.users table in database
+    const { data: dbUser } = await supabase
+      .from("users")
+      .select("id, name, email, password")
+      .ilike("email", normalizedEmail)
+      .maybeSingle();
+
+    if (dbUser && dbUser.password) {
+      const isMatch = await bcrypt.compare(password, dbUser.password);
+      if (!isMatch) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password.",
+        });
+      }
+      authenticatedUser = {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+      };
+    } else {
+      // 2. If not found in public.users, match against Supabase Auth (auth.users)
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
       });
+
+      if (authError || !authData?.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password.",
+        });
+      }
+
+      authenticatedUser = {
+        id: authData.user.id,
+        name: authData.user.user_metadata?.name || normalizedEmail.split("@")[0],
+        email: authData.user.email,
+      };
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
-      });
-    }
-
-    // Generate JWT token
+    // 3. Generate JWT token
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name },
+      {
+        id: authenticatedUser.id,
+        email: authenticatedUser.email,
+        name: authenticatedUser.name,
+      },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Send HTTP-Only Cookie
+    // 4. Send HTTP-Only Cookie
     res.cookie("auth_token", token, COOKIE_OPTIONS);
 
     return res.status(200).json({
       success: true,
       message: "Logged in successfully.",
-      user: { id: user.id, name: user.name, email: user.email },
+      user: authenticatedUser,
     });
   } catch (error) {
     return res.status(500).json({
