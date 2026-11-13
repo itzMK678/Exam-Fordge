@@ -1,6 +1,6 @@
 
 import { Routes, Route } from 'react-router-dom';
-import Mainpage from './Front-Page/mainpage.jsx';
+import Mainpage from './Front-Page/Mainpage.jsx';
 import './App.css';
 import Login from './Front-Page/Auth/Login.jsx';
 import Signup from './Front-Page/Auth/Signup.jsx';
