@@ -1,5 +1,6 @@
 import express from "express";
 import { aiInteractionLimiter } from "../middleware/rateLimiter.middleware.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 
 import {
   discussQuestionController,
@@ -7,6 +8,8 @@ import {
 } from "../controller/discussion.controller.js";
 
 const router = express.Router();
+
+router.use(requireAuth);
 
 router.post(
   "/discuss",

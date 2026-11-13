@@ -1,9 +1,15 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || env?.jwtSecret || "super_secret_jwt_key_123!";
+const JWT_SECRET = env.jwtSecret || process.env.JWT_SECRET;
 
 export const requireAuth = (req, res, next) => {
+  if (!JWT_SECRET) {
+    return res.status(500).json({
+      success: false,
+      message: "Server configuration error: JWT secret is not configured.",
+    });
+  }
   try {
     // 1. Read token from cookie (or fallback to Authorization header)
     const token =

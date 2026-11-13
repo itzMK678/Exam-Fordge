@@ -191,6 +191,7 @@ const clearExam = () => {
       const xhr = new XMLHttpRequest();
       const uploadPromise = new Promise((resolve, reject) => {
         xhr.open("POST", `${API_URL}/api/documents/upload`);
+        xhr.withCredentials = true;
 
         xhr.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
@@ -258,6 +259,7 @@ const clearExam = () => {
 
       const response = await fetch(`${API_URL}/api/exams/generate`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

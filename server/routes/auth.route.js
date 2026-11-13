@@ -4,9 +4,12 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { supabase } from "../services/supabase.service.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
+import { authLimiter } from "../middleware/rateLimiter.middleware.js";
+import { env } from "../config/env.js";
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "super_secret_jwt_key_123!";
+const JWT_SECRET = env.jwtSecret || process.env.JWT_SECRET;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Cookie security options
 const COOKIE_OPTIONS = {
@@ -19,8 +22,15 @@ const COOKIE_OPTIONS = {
 // ===================================================
 // POST /api/auth/signup
 // ===================================================
-router.post("/signup", async (req, res) => {
+router.post("/signup", authLimiter, async (req, res) => {
   try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: JWT secret is not configured.",
+      });
+    }
+
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -32,6 +42,34 @@ router.post("/signup", async (req, res) => {
 
     const trimmedName = String(name).trim();
     const normalizedEmail = String(email).trim().toLowerCase();
+
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be between 2 and 100 characters.",
+      });
+    }
+
+    if (!EMAIL_REGEX.test(normalizedEmail) || normalizedEmail.length > 255) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address.",
+      });
+    }
+
+    if (typeof password !== "string" || password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters long.",
+      });
+    }
+
+    if (password.length > 72) {
+      return res.status(400).json({
+        success: false,
+        message: "Password cannot exceed 72 characters.",
+      });
+    }
 
     // 1. Check if user already exists in public.users table (if table exists)
     const { data: existingPublicUser } = await supabase
@@ -121,8 +159,15 @@ router.post("/signup", async (req, res) => {
 // ===================================================
 // POST /api/auth/login
 // ===================================================
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: JWT secret is not configured.",
+      });
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -133,6 +178,14 @@ router.post("/login", async (req, res) => {
     }
 
     const normalizedEmail = String(email).trim().toLowerCase();
+
+    if (!EMAIL_REGEX.test(normalizedEmail) || typeof password !== "string" || password.length > 72) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password.",
+      });
+    }
+
     let authenticatedUser = null;
 
     // 1. Try matching from public.users table in database

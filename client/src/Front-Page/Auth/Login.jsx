@@ -16,8 +16,14 @@ export default function Login() {
     setError("");
     setLoading(true);
     const data = new FormData(e.target);
-    const email = data.get("email");
-    const password = data.get("password");
+    const email = data.get("email")?.toString().trim().toLowerCase();
+    const password = data.get("password")?.toString();
+
+    if (!email || !password) {
+      setError("Please enter both email and password.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch(`${API_URL}/api/auth/login`, {
@@ -70,7 +76,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="w-1/2 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
+        <div className="w-1/2 rounded-r-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="mb-2 block text-sm text-slate-200">

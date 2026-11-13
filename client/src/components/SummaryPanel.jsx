@@ -57,6 +57,7 @@ function SummaryPanel({
     try {
       const response = await fetch(`${API_URL}/api/documents/summarize`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },

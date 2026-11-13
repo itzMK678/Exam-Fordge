@@ -24,7 +24,8 @@ export async function generateExamController(req, res, next) {
     // Background async jobs/PM2/BullMQ/Redis cannot persist across
     // serverless invocations on Vercel. We generate directly:
     // ============================================================
-    const result = await generateExam(parseResult.data);
+    const userId = req.user?.id;
+    const result = await generateExam(parseResult.data, userId);
     return res.status(200).json({
       success: true,
       message: "Exam generated successfully.",
@@ -43,7 +44,8 @@ export async function generateExamController(req, res, next) {
     (async () => {
       try {
         await updateJob(job.id, { progress: 30 });
-        const result = await generateExam(parseResult.data);
+        const userId = req.user?.id;
+    const result = await generateExam(parseResult.data, userId);
         await updateJob(job.id, {
           status: "completed",
           progress: 100,

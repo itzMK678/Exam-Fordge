@@ -25,6 +25,7 @@ console.log(
       });
     }
 
+    const userId = req.user?.id;
     const CONCURRENCY_LIMIT = 3;
     const results = new Array(files.length);
 
@@ -34,7 +35,7 @@ console.log(
         slice.map(async (file, offset) => {
           const idx = i + offset;
           try {
-            const document = await processDocument(file);
+            const document = await processDocument(file, userId);
             results[idx] = {
               success: true,
               document,

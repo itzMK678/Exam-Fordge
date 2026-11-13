@@ -3,3 +3,15 @@
 !.env.example
 node_modules/
 dist/
+dist-ssr/
+*.local
+*.log
+
+# Python cache & virtualenvs
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/

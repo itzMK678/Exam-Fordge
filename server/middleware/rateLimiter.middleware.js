@@ -56,3 +56,14 @@ export const aiInteractionLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 attempts per 15 minutes
+  message: {
+    success: false,
+    message: "Too many authentication attempts. Please try again after 15 minutes.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

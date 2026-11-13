@@ -15,10 +15,11 @@ function App() {
       <Route path="/" element={<Mainpage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/dashboard" element={<h1>Dashboard</h1>} />
-      <Route path="/protectedroutes" element={<ProtectedRoute />} />
-      <Route path="/work" element={<UploadPage />} />
-      <Route path="/history" element={<HistoryPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<h1>Dashboard</h1>} />
+        <Route path="/work" element={<UploadPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+      </Route>
     </Routes>
     </ExamProvider>
   );

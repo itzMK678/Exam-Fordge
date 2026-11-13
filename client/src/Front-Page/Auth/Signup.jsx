@@ -25,10 +25,25 @@ export default function Signup() {
     e.preventDefault();
     setError("");
     const data = new FormData(e.target);
-    const name = data.get("name");
-    const email = data.get("email");
-    const password = data.get("password");
-    const confirmPassword = data.get("confirmPassword");
+    const name = data.get("name")?.toString().trim();
+    const email = data.get("email")?.toString().trim().toLowerCase();
+    const password = data.get("password")?.toString();
+    const confirmPassword = data.get("confirmPassword")?.toString();
+
+    if (!name || !email || !password) {
+      setError("All fields are required.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (password.length > 72) {
+      setError("Password cannot exceed 72 characters.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -62,8 +77,8 @@ export default function Signup() {
       <div className="w-full max-w-[900px] bg-gradient-to-r from-[#fcfdfe] to-[#f2f7fe] flex border border-blue-500 rounded-2xl">
 
         {/* Left Section */}
-        <div className="relative w-1/2 text-center p-8 flex flex-col justify-center">
-        <div> 
+         <div className="relative w-1/2 rounded-l-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
+           <div> 
           <a
           href="/"
          
@@ -74,33 +89,7 @@ export default function Signup() {
           </span>
           Exam<span className="text-blue-600">Forge</span>
         </a></div>
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#155dfc] text-white">
-            <UserPlus size={28} />
-          </div>
-
-          <h1 className="text-3xl font-bold text-[#155dfc]">
-            Create Account
-          </h1>
-
-          <p className="mt-2 text-slate-700">
-            Join us and get started today. Create your account to access
-            exams, quizzes, and other learning resources.
-          </p>
-
-          <p className="mt-7 text-center text-sm text-black">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-semibold text-indigo-400 hover:text-indigo-300"
-            >
-              Sign in
-            </Link>
-          </p>
-        </div>
-
-        {/* Right Section */}
-        <div className="w-1/2 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl sm:p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Full Name */}
             <div>
@@ -232,6 +221,34 @@ export default function Signup() {
               <ArrowRight size={18} />
             </button>
           </form>
+        </div>
+        
+
+        {/* Right Section */}
+       <div className="relative w-1/2 text-center p-8 flex flex-col justify-center">
+       
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#155dfc] text-white">
+            <UserPlus size={28} />
+          </div>
+
+          <h1 className="text-3xl font-bold text-[#155dfc]">
+            Create Account
+          </h1>
+
+          <p className="mt-2 text-slate-700">
+            Join us and get started today. Create your account to access
+            exams, quizzes, and other learning resources.
+          </p>
+
+          <p className="mt-7 text-center text-sm text-black">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-indigo-400 hover:text-indigo-300"
+            >
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
     </main>

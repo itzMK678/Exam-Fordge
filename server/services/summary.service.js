@@ -1,5 +1,6 @@
 import { generateTextContent, streamTextContent } from "./gemini.service.js";
 import { retrieveContext } from "./rag.service.js";
+import { supabase } from "./supabase.service.js";
 
 function buildSummaryPrompt(chunks) {
   const documentText = chunks
@@ -41,9 +42,25 @@ Summary requirements:
 // GENERATE DOCUMENT SUMMARY
 // ============================================================
 
-export async function summarizeDocument(documentId) {
+export async function summarizeDocument(documentId, userId) {
   if (!documentId) {
     throw new Error("Document ID is required.");
+  }
+
+  if (userId) {
+    const { data: doc, error: docError } = await supabase
+      .from("documents")
+      .select("id, user_id")
+      .eq("id", documentId)
+      .maybeSingle();
+
+    if (docError || !doc) {
+      throw new Error("Document not found.");
+    }
+
+    if (doc.user_id && doc.user_id !== String(userId)) {
+      throw new Error("Access denied: You do not have permission to view this document.");
+    }
   }
 
   const { chunks } = await retrieveContext({ documentId });
@@ -60,9 +77,25 @@ export async function summarizeDocument(documentId) {
   });
 }
 
-export async function* summarizeDocumentStream(documentId, signal) {
+export async function* summarizeDocumentStream(documentId, signal, userId) {
   if (!documentId) {
     throw new Error("Document ID is required.");
+  }
+
+  if (userId) {
+    const { data: doc, error: docError } = await supabase
+      .from("documents")
+      .select("id, user_id")
+      .eq("id", documentId)
+      .maybeSingle();
+
+    if (docError || !doc) {
+      throw new Error("Document not found.");
+    }
+
+    if (doc.user_id && doc.user_id !== String(userId)) {
+      throw new Error("Access denied: You do not have permission to view this document.");
+    }
   }
 
   const { chunks } = await retrieveContext({ documentId });

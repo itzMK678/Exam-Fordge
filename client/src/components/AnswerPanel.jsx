@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useExam } from "../Context/ExamContent";
 import MarkdownRenderer from "./MarkdownRenderer.jsx";
 
@@ -124,6 +124,7 @@ function AnswerPanel() {
     // ============================================================
     try {
       const response = await fetch(`${API_URL}/api/exams/discuss`, {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",

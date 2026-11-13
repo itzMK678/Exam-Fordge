@@ -14,6 +14,7 @@ const requiredEnv = [
   "SUPABASE_SERVICE_ROLE_KEY",
   "GEMINI_API_KEY",
   "ENCRYPTION_SECRET",
+  "JWT_SECRET",
   // "REDIS_URL", // [COMMENTED OUT FOR VERCEL] Redis is optional in serverless mode
 ];
 
@@ -66,5 +67,7 @@ export const env = {
 
   encryptionSecret: process.env.ENCRYPTION_SECRET,
 
-  jwtSecret: process.env.JWT_SECRET || "super_secret_jwt_key_123!",
+  jwtSecret: process.env.JWT_SECRET,
+
+  internalWorkerSecret: process.env.INTERNAL_WORKER_SECRET || "",
 };

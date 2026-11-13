@@ -8,7 +8,7 @@ import { saveDocumentChunks, deleteDocumentChunks } from "./vector.service.js";
 
 const INSERT_BATCH_SIZE = 100;
 
-export async function processDocument(file) {
+export async function processDocument(file, userId) {
   const documentId = randomUUID();
 
   try {
@@ -51,20 +51,26 @@ export async function processDocument(file) {
     // ======================================================
     console.log(`[${file.originalname}] Saving document metadata...`);
 
+    const docPayload = {
+      id: documentId,
+      filename: file.originalname,
+      file_type: extraction.file_type,
+      mime_type: file.mimetype,
+      storage_path: "text_only",
+      file_size: file.size,
+      page_count: extraction.page_count,
+      word_count: extraction.word_count,
+      character_count: extraction.character_count,
+      status: "processing",
+    };
+
+    if (userId) {
+      docPayload.user_id = String(userId);
+    }
+
     const { error: documentError } = await supabase
       .from("documents")
-      .insert({
-        id: documentId,
-        filename: file.originalname,
-        file_type: extraction.file_type,
-        mime_type: file.mimetype,
-        storage_path: "text_only",
-        file_size: file.size,
-        page_count: extraction.page_count,
-        word_count: extraction.word_count,
-        character_count: extraction.character_count,
-        status: "processing",
-      });
+      .insert(docPayload);
 
     if (documentError) {
       throw new Error(`Document insert failed: ${documentError.message}`);

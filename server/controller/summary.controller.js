@@ -17,8 +17,9 @@ export async function summarizeDocumentController(req, res, next) {
     }
 
     const { documentId } = parseResult.data;
+    const userId = req.user?.id;
 
-    const summary = await summarizeDocument(documentId);
+    const summary = await summarizeDocument(documentId, userId);
 
     return res.status(200).json({
       success: true,

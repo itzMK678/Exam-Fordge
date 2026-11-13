@@ -1,5 +1,6 @@
 import express from "express";
 import { aiInteractionLimiter } from "../middleware/rateLimiter.middleware.js";
+import { requireAuth } from "../middleware/auth.middleware.js";
 
 import {
   summarizeDocumentController,
@@ -10,6 +11,7 @@ const router = express.Router();
 
 router.post(
   "/summarize",
+  requireAuth,
   aiInteractionLimiter,
   summarizeDocumentController
 );

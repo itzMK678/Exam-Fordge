@@ -26,6 +26,9 @@ export async function extractFile(file) {
       {
         headers: {
           ...form.getHeaders(),
+          ...(env.internalWorkerSecret
+            ? { "x-internal-secret": env.internalWorkerSecret }
+            : {}),
         },
 
         maxContentLength: Infinity,

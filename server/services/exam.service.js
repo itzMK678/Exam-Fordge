@@ -6,7 +6,7 @@ import { allocateQuestionTypes } from "../utils/allocation.utils.js";
 /**
  * Get documents from database and ensure they are ready.
  */
-async function getDocuments(documentIds) {
+async function getDocuments(documentIds, userId) {
   const { data, error } = await supabase
     .from("documents")
     .select(`
@@ -14,7 +14,8 @@ async function getDocuments(documentIds) {
       filename,
       word_count,
       page_count,
-      status
+      status,
+      user_id
     `)
     .in("id", documentIds);
 
@@ -24,6 +25,13 @@ async function getDocuments(documentIds) {
 
   if (!data?.length) {
     throw new Error("No documents found for the provided IDs.");
+  }
+
+  if (userId) {
+    const unauthorized = data.filter((doc) => doc.user_id && doc.user_id !== String(userId));
+    if (unauthorized.length > 0) {
+      throw new Error("Access denied: You do not have permission to access one or more requested documents.");
+    }
   }
 
   const notReady = data.filter((doc) => doc.status !== "ready");
@@ -213,16 +221,19 @@ async function generateForDocument({
 /**
  * Generate complete exam with parallelized document processing.
  */
-export async function generateExam({
-  documentIds,
-  totalQuestions,
-  mcqCount,
-  shortCount,
-  longCount,
-  difficulty = "medium",
-  focusTopics = "",
-  includeAnswers = true,
-}) {
+export async function generateExam(
+  {
+    documentIds,
+    totalQuestions,
+    mcqCount,
+    shortCount,
+    longCount,
+    difficulty = "medium",
+    focusTopics = "",
+    includeAnswers = true,
+  },
+  userId
+) {
   if (!Array.isArray(documentIds) || documentIds.length === 0) {
     throw new Error("At least one document is required.");
   }
@@ -236,8 +247,8 @@ export async function generateExam({
     throw new Error("The sum of MCQ, short, and long questions must equal totalQuestions.");
   }
 
-  // Load and validate documents
-  const documents = await getDocuments(documentIds);
+  // Load and validate documents with user ownership check
+  const documents = await getDocuments(documentIds, userId);
 
   // Allocate questions across documents using the largest remainder method
   const allocations = allocateQuestionTypes({

@@ -1,6 +1,7 @@
+import os
 import logging
 import asyncio
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from extractors.pdf import extract_pdf
 from extractors.docx import extract_docx
@@ -9,6 +10,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("examforge-worker")
 
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB limit
+INTERNAL_WORKER_SECRET = os.getenv("INTERNAL_WORKER_SECRET", "").strip()
 
 app = FastAPI(
     title="ExamForge Document Worker",
@@ -16,11 +18,19 @@ app = FastAPI(
     description="High-performance extraction microservice for PDF and DOCX educational documents"
 )
 
+# Safe CORS configuration (disallows wildcard with credentials)
+cors_origins_env = os.getenv("CORS_ORIGIN", "http://localhost:5000,http://127.0.0.1:5000")
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in cors_origins_env.split(",")
+    if origin.strip() and origin.strip() != "*"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -43,8 +53,14 @@ def health():
 
 @app.post("/extract")
 async def extract_document(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    x_internal_secret: str = Header(default=None)
 ):
+    if INTERNAL_WORKER_SECRET and x_internal_secret != INTERNAL_WORKER_SECRET:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: Invalid internal worker secret."
+        )
     filename = file.filename or "uploaded_file"
     filename_lower = filename.lower()
 

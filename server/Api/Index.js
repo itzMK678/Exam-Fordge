@@ -20,17 +20,29 @@ const app = express();
 // --------------------------------------------------
 // Middleware
 // --------------------------------------------------
-const allowedOrigins = env.corsOrigin
-  ? env.corsOrigin.split(",").map((o) => o.trim())
-  : ["http://localhost:5173"];
+const configuredOrigins = env.corsOrigin
+  ? env.corsOrigin.split(",").map((o) => o.trim()).filter((o) => o && o !== "*")
+  : [];
+
+const defaultDevOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+];
+
+const allowedOrigins = new Set([
+  ...defaultDevOrigins,
+  ...configuredOrigins,
+]);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      // Allow non-browser requests or same-origin requests with no origin header
+      if (!origin) {
         return callback(null, true);
       }
-      if (process.env.NODE_ENV !== "production") {
+      if (allowedOrigins.has(origin)) {
         return callback(null, true);
       }
       return callback(new Error(`CORS error: Origin ${origin} is not allowed.`));
