@@ -8,20 +8,24 @@ import UploadPage from './working-pages/UploadPage.jsx';
 import ProtectedRoute from './working-pages/ProtectedRoute.jsx';
 import HistoryPage from './working-pages/HistoryPage.jsx';
 import { ExamProvider } from "./Context/ExamContent";
+import { AuthProvider } from "./Context/AuthContext";
+
 function App() {
   return (
+    <AuthProvider>
       <ExamProvider>
-    <Routes>
-      <Route path="/" element={<Mainpage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<h1>Dashboard</h1>} />
-        <Route path="/work" element={<UploadPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-      </Route>
-    </Routes>
-    </ExamProvider>
+        <Routes>
+          <Route path="/" element={<Mainpage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<h1>Dashboard</h1>} />
+            <Route path="/work" element={<UploadPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+          </Route>
+        </Routes>
+      </ExamProvider>
+    </AuthProvider>
   );
 }
 

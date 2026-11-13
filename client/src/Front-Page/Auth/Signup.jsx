@@ -11,6 +11,7 @@ import {
   ArrowRight,
   UserPlus,
 } from "lucide-react";
+import { useAuth } from "../../Context/AuthContext";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -20,6 +21,7 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,6 +64,10 @@ export default function Signup() {
       const result = await res.json();
       if (!res.ok) {
         throw new Error(result.message || "Failed to create account.");
+      }
+
+      if (result.user) {
+        setUser(result.user);
       }
 
       navigate("/work");

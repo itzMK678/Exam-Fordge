@@ -1,33 +1,10 @@
-import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+import { useAuth } from "../Context/AuthContext";
 
 export default function ProtectedRoute() {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/auth/me`, {
-          method: "GET",
-          credentials: "include", // Sends the auth_token cookie
-        });
-
-        if (res.ok) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (loading && !user) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
@@ -35,5 +12,5 @@ export default function ProtectedRoute() {
     );
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  return user ? <Outlet /> : <Navigate to="/login" replace />;
 }

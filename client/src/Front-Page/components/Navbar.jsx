@@ -1,14 +1,19 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   GraduationCap,
   Menu,
   X,
+  User,
+  LogOut,
+  Sparkles,
 } from "lucide-react";
+import { useAuth } from "../../Context/AuthContext";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const links = [
     ["Home", "/#home"],
@@ -18,6 +23,12 @@ const Navbar = () => {
   ];
 
   const closeMenu = () => setMenuOpen(false);
+
+  const handleLogout = async () => {
+    closeMenu();
+    await logout();
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-lg">
@@ -59,24 +70,71 @@ const Navbar = () => {
             </a>
           ))}
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/login"
-              onClick={closeMenu}
-              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:border-blue-600 hover:text-blue-600"
-            >
-              Login
-            </Link>
-<Link
-              to="/work"
-           
-              onClick={closeMenu}
-              className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
-            >
-              Get Started
-            
-            </Link>
-          </div>
+          {user ? (
+            <div className="flex flex-col gap-3 md:flex-row md:items-center">
+              {/* User Name Badge */}
+              <div
+                className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5"
+                title={user.email || user.name}
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-xs font-bold text-white uppercase shadow-xs">
+                  {user.name ? (
+                    user.name.trim().charAt(0).toUpperCase()
+                  ) : (
+                    <User size={16} />
+                  )}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="max-w-[140px] truncate text-sm font-bold text-slate-800">
+                    {user.name || "Student"}
+                  </span>
+                  {user.email && (
+                    <span className="max-w-[140px] truncate text-[11px] text-slate-500">
+                      {user.email}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Quick Generator Link */}
+              <Link
+                to="/work"
+                onClick={closeMenu}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
+              >
+                
+                <span>Start Learning</span>
+              </Link>
+
+              {/* Logout Option */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/70 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 hover:text-rose-700 cursor-pointer"
+                title="Logout"
+              >
+                <LogOut size={16} />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/login"
+                onClick={closeMenu}
+                className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:border-blue-600 hover:text-blue-600 transition"
+              >
+                Login
+              </Link>
+              <Link
+                to="/work"
+                onClick={closeMenu}
+                className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
       </nav>
     </header>
