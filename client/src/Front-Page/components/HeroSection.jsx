@@ -44,7 +44,7 @@ const HeroSection = () => {
                 Try it 
               </a>
               <a
-                href="#how-work"
+                href="#How-work"
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-600"
               >
                 <Play size={16} fill="currentColor" />
