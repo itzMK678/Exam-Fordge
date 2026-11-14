@@ -7,11 +7,13 @@
 -- 1. TABLE: public.users
 -- Stores user credentials and profile details
 CREATE TABLE IF NOT EXISTS public.users (
-  id           TEXT PRIMARY KEY,                  -- Unique user ID (e.g. UUID)
-  name         TEXT NOT NULL,                     -- User full name
-  email        TEXT UNIQUE NOT NULL,              -- User email (case-insensitive queries)
-  password     TEXT NOT NULL,                     -- Bcrypt hashed password
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW() -- Registration timestamp
+  id             TEXT PRIMARY KEY,                  -- Unique user ID (e.g. UUID)
+  name           TEXT NOT NULL,                     -- User full name
+  email          TEXT UNIQUE NOT NULL,              -- User email (case-insensitive queries)
+  password       TEXT NOT NULL,                     -- Bcrypt hashed password
+  is_blocked     BOOLEAN DEFAULT false,             -- Admin block status
+  last_active_at TIMESTAMPTZ DEFAULT NOW(),         -- User last active timestamp
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW() -- Registration timestamp
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON public.users (LOWER(email));
@@ -248,7 +250,17 @@ CREATE POLICY "Allow user delete in lecture-recordings" ON storage.objects
 -- 10. ADMIN DASHBOARD TABLES & USER EXTENSIONS (/boss)
 -- ============================================================
 
--- Extend users table with status & activity tracking
+-- Ensure public.users exists and has required columns
+CREATE TABLE IF NOT EXISTS public.users (
+  id             TEXT PRIMARY KEY,
+  name           TEXT NOT NULL,
+  email          TEXT UNIQUE NOT NULL,
+  password       TEXT NOT NULL,
+  is_blocked     BOOLEAN DEFAULT false,
+  last_active_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN DEFAULT false;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMPTZ DEFAULT NOW();
 
@@ -364,4 +376,143 @@ ALTER TABLE public.platform_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Settings service role only" ON public.platform_settings;
 CREATE POLICY "Settings service role only" ON public.platform_settings
   FOR ALL USING (false);
+
+-- ============================================================
+-- 11. AI STUDY PLANNER & EXAM SCHEDULER TABLES
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.study_plans (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             TEXT NOT NULL,
+  title               TEXT NOT NULL,
+  description         TEXT,
+  daily_study_hours   NUMERIC NOT NULL DEFAULT 3.0,
+  preferred_days      TEXT[] NOT NULL DEFAULT '{"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"}',
+  status              TEXT NOT NULL DEFAULT 'active',
+  analysis_summary    JSONB DEFAULT '{}'::jsonb,
+  ai_rationale        TEXT,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_study_plans_user ON public.study_plans(user_id, created_at DESC);
+
+ALTER TABLE public.study_plans ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own study plans" ON public.study_plans;
+CREATE POLICY "Users can only manage their own study plans"
+  ON public.study_plans FOR ALL
+  USING (auth.uid()::text = user_id);
+
+CREATE TABLE IF NOT EXISTS public.study_plan_exams (
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id                 UUID NOT NULL REFERENCES public.study_plans(id) ON DELETE CASCADE,
+  user_id                 TEXT NOT NULL,
+  exam_name               TEXT NOT NULL,
+  subject                 TEXT NOT NULL,
+  exam_date               DATE NOT NULL,
+  test_type               TEXT NOT NULL DEFAULT 'Midterm',
+  syllabus                TEXT NOT NULL,
+  included_chapters       TEXT,
+  difficulty_level        TEXT DEFAULT 'Medium',
+  additional_instructions TEXT,
+  created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_exams ON public.study_plan_exams(plan_id, exam_date ASC);
+
+ALTER TABLE public.study_plan_exams ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own plan exams" ON public.study_plan_exams;
+CREATE POLICY "Users can only manage their own plan exams"
+  ON public.study_plan_exams FOR ALL
+  USING (auth.uid()::text = user_id);
+
+CREATE TABLE IF NOT EXISTS public.study_plan_documents (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id     UUID NOT NULL REFERENCES public.study_plans(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES public.documents(id) ON DELETE CASCADE,
+  user_id     TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_documents ON public.study_plan_documents(plan_id);
+
+ALTER TABLE public.study_plan_documents ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own plan documents" ON public.study_plan_documents;
+CREATE POLICY "Users can only manage their own plan documents"
+  ON public.study_plan_documents FOR ALL
+  USING (auth.uid()::text = user_id);
+
+CREATE TABLE IF NOT EXISTS public.study_plan_material_mappings (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id         UUID NOT NULL REFERENCES public.study_plans(id) ON DELETE CASCADE,
+  subject         TEXT NOT NULL,
+  topic           TEXT NOT NULL,
+  subtopics       TEXT[] DEFAULT '{}',
+  coverage_status TEXT NOT NULL DEFAULT 'covered',
+  document_name   TEXT,
+  page_reference  TEXT,
+  complexity      TEXT DEFAULT 'Medium',
+  estimated_hours NUMERIC DEFAULT 1.5,
+  is_overlapping  BOOLEAN DEFAULT false,
+  notes           TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_mappings ON public.study_plan_material_mappings(plan_id);
+
+ALTER TABLE public.study_plan_material_mappings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own plan mappings" ON public.study_plan_material_mappings;
+CREATE POLICY "Users can only manage their own plan mappings"
+  ON public.study_plan_material_mappings FOR ALL
+  USING (plan_id IN (SELECT id FROM public.study_plans WHERE user_id = auth.uid()::text));
+
+CREATE TABLE IF NOT EXISTS public.study_plan_tasks (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id           UUID NOT NULL REFERENCES public.study_plans(id) ON DELETE CASCADE,
+  user_id           TEXT NOT NULL,
+  scheduled_date    DATE NOT NULL,
+  day_of_week       TEXT,
+  subject           TEXT NOT NULL,
+  topic             TEXT NOT NULL,
+  subtopic          TEXT,
+  task_type         TEXT NOT NULL DEFAULT 'learning',
+  title             TEXT NOT NULL,
+  description       TEXT,
+  document_name     TEXT,
+  page_reference    TEXT,
+  estimated_minutes INT NOT NULL DEFAULT 60,
+  actual_minutes    INT NOT NULL DEFAULT 0,
+  status            TEXT NOT NULL DEFAULT 'pending',
+  notes             TEXT,
+  order_index       INT NOT NULL DEFAULT 0,
+  completed_at      TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_tasks_date ON public.study_plan_tasks(plan_id, scheduled_date ASC);
+CREATE INDEX IF NOT EXISTS idx_plan_tasks_user ON public.study_plan_tasks(user_id, scheduled_date ASC);
+
+ALTER TABLE public.study_plan_tasks ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own plan tasks" ON public.study_plan_tasks;
+CREATE POLICY "Users can only manage their own plan tasks"
+  ON public.study_plan_tasks FOR ALL
+  USING (auth.uid()::text = user_id);
+
+CREATE TABLE IF NOT EXISTS public.study_plan_chats (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  plan_id    UUID NOT NULL REFERENCES public.study_plans(id) ON DELETE CASCADE,
+  user_id    TEXT NOT NULL,
+  role       TEXT NOT NULL,
+  content    TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_plan_chats ON public.study_plan_chats(plan_id, created_at ASC);
+
+ALTER TABLE public.study_plan_chats ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can only manage their own plan chats" ON public.study_plan_chats;
+CREATE POLICY "Users can only manage their own plan chats"
+  ON public.study_plan_chats FOR ALL
+  USING (auth.uid()::text = user_id);
 

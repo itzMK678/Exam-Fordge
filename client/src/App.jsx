@@ -13,6 +13,7 @@ import { ExamProvider } from "./Context/ExamContent";
 import { AuthProvider } from "./Context/AuthContext";
 
 const BossAdminDashboard = lazy(() => import('./Admin-Dashboard/BossAdminDashboard.jsx'));
+const StudyPlannerPage = lazy(() => import('./Study-Planner/StudyPlannerPage.jsx'));
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/daily-lecture" element={<DailyLecturePage />} />
               <Route path="/lectures" element={<DailyLecturePage />} />
+              <Route path="/study-planner" element={<StudyPlannerPage />} />
             </Route>
           </Routes>
         </Suspense>

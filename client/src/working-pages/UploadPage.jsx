@@ -479,6 +479,12 @@ const clearExam = () => {
           >
              <span>Daily Lecture (Audio/Video AI)</span>
           </Link>
+         <Link
+            to="/study-planner"
+            className="text-xs rounded-xl font-bold text-white hover:opacity-95 flex items-center gap-1.5 bg-indigo-600 px-3.5 py-2 shadow-xs transition hover:bg-indigo-700"
+          >
+             <span>AI Study Planner & Exam Scheduler</span>
+          </Link>
        </div>
       <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
         {/* ==================================================

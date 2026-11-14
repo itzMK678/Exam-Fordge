@@ -8,6 +8,7 @@ import {
   LogOut,
   Sparkles,
   Headphones,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -19,6 +20,7 @@ const Navbar = () => {
   const links = [
     ["Home", "/#home"],
     ["Daily Lecture", "/daily-lecture"],
+    ["Study Planner", "/study-planner"],
     ["Features", "/#features"],
     ["About", "/#about"],
     ["How It Works", "/#How-work"],
@@ -107,6 +109,17 @@ const Navbar = () => {
               >
                 <Headphones size={16} />
                 <span>Daily Lecture</span>
+              </Link>
+
+              {/* AI Study Planner Link */}
+              <Link
+                to="/study-planner"
+                onClick={closeMenu}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 px-3.5 py-2 text-sm font-bold text-blue-700 transition hover:bg-blue-100 shadow-2xs"
+                title="AI Study Planner & Exam Scheduler"
+              >
+                <Calendar size={16} />
+                <span>Study Planner</span>
               </Link>
 
               {/* Quick Generator Link */}

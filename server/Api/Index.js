@@ -14,6 +14,7 @@ import workRoutes from "../routes/work.route.js";
 import historyRoutes from "../routes/history.route.js";
 import lectureRoutes from "../routes/lecture.route.js";
 import adminRoutes from "../routes/admin.route.js";
+import studyPlannerRoutes from "../routes/studyPlanner.route.js";
 
 import { errorMiddleware } from "../middleware/error.middleware.js";
 
@@ -76,6 +77,7 @@ app.use("/api/exams", examRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/study-planner", studyPlannerRoutes);
 
 // --------------------------------------------------
 // Protected /work Route

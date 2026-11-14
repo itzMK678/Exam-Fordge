@@ -278,7 +278,34 @@ export async function updateAdminCredentials({
 // 2. OVERVIEW STATISTICS & RECENT ACTIVITY
 // ============================================================
 
+/**
+ * Automatically syncs users from Supabase Auth (auth.users) into public.users
+ * so legacy users and newly registered auth users are always visible to admin.
+ */
+export async function syncAuthUsersToPublicUsers() {
+  try {
+    const { data: authData } = await supabase.auth.admin.listUsers();
+    if (!authData?.users || authData.users.length === 0) return;
+
+    const toUpsert = authData.users.map((u) => ({
+      id: u.id,
+      name: u.user_metadata?.name || u.user_metadata?.full_name || u.email?.split("@")[0] || "Student",
+      email: u.email,
+      password: "[managed_by_supabase_auth]",
+      created_at: u.created_at || new Date().toISOString(),
+      last_active_at: u.last_sign_in_at || u.created_at || new Date().toISOString(),
+      is_blocked: false,
+    }));
+
+    await supabase.from("users").upsert(toUpsert, { onConflict: "id", ignoreDuplicates: true });
+  } catch (err) {
+    console.warn("User auto-sync notice:", err.message);
+  }
+}
+
 export async function getOverviewStats() {
+  await syncAuthUsersToPublicUsers();
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayISO = todayStart.toISOString();
@@ -393,6 +420,8 @@ export async function getOverviewStats() {
 // ============================================================
 
 export async function listUsers({ search = "", status = "all", page = 1, limit = 15 }) {
+  await syncAuthUsersToPublicUsers();
+
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
