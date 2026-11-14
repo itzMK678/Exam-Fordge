@@ -1,8 +1,10 @@
 ﻿import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../Front-Page/components/Navbar";
 import SummaryPanel from "../components/SummaryPanel";
 import { useExam } from "../Context/ExamContent";
 import AnswerPanel from "../components/AnswerPanel";
+import { uploadDocumentDirect } from "../Lecture-Intelligence/services/storageUpload";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // =========================================================================
@@ -169,7 +171,7 @@ const clearExam = () => {
   };
 
   // -----------------------------------------------------------------------
-  // UPLOAD DOCUMENTS
+  // UPLOAD DOCUMENTS (Direct-to-Supabase Storage with Multipart Fallback)
   // -----------------------------------------------------------------------
   const uploadDocuments = async () => {
     if (files.length === 0) {
@@ -182,58 +184,93 @@ const clearExam = () => {
     setError("");
     setUploadResult(null);
 
+    // 1. Try Direct-to-Supabase Storage upload (bypasses Vercel 4.5 MB body limit)
     try {
-      const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
+      const uploadedFilePaths = [];
+      const totalFiles = files.length;
 
-      const xhr = new XMLHttpRequest();
-      const uploadPromise = new Promise((resolve, reject) => {
-        xhr.open("POST", `${API_URL}/api/documents/upload`);
-        xhr.withCredentials = true;
-
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(progress);
-          }
+      for (let i = 0; i < totalFiles; i++) {
+        const file = files[i];
+        const res = await uploadDocumentDirect(file, (percent) => {
+          const overall = Math.round(((i + percent / 100) / totalFiles) * 100);
+          setUploadProgress(overall);
         });
+        uploadedFilePaths.push(res);
+      }
 
-        xhr.addEventListener("load", () => {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            if (xhr.status >= 200 && xhr.status < 300) {
-              resolve(response);
-            } else {
-              reject(
-                new Error(response.message || response.error || "Upload failed.")
-              );
-            }
-          } catch {
-            reject(new Error("Invalid response from server."));
-          }
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Could not connect to backend server. Make sure it is running on port 5000."));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload was cancelled."));
-        });
-
-        xhr.send(formData);
-      });
-
-      const result = await uploadPromise;
       setUploadProgress(100);
+
+      const processRes = await fetch(`${API_URL}/api/documents/process-storage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ files: uploadedFilePaths }),
+      });
+
+      const result = await processRes.json();
+      if (!processRes.ok || !result.success) {
+        throw new Error(result.message || "Failed to process uploaded documents.");
+      }
+
       setUploadResult(result);
       return result;
-    } catch (uploadError) {
-      console.error(uploadError);
-      setError(uploadError.message || "Something went wrong while uploading.");
-      return null;
+    } catch (directStorageErr) {
+      console.warn("Direct storage upload failed, attempting fallback:", directStorageErr.message);
+
+      // Fallback: Legacy multipart upload
+      try {
+        const formData = new FormData();
+        files.forEach((file) => {
+          formData.append("files", file);
+        });
+
+        const xhr = new XMLHttpRequest();
+        const uploadPromise = new Promise((resolve, reject) => {
+          xhr.open("POST", `${API_URL}/api/documents/upload`);
+          xhr.withCredentials = true;
+
+          xhr.upload.addEventListener("progress", (event) => {
+            if (event.lengthComputable) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              setUploadProgress(progress);
+            }
+          });
+
+          xhr.addEventListener("load", () => {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (xhr.status >= 200 && xhr.status < 300) {
+                resolve(response);
+              } else {
+                reject(
+                  new Error(response.message || response.error || "Upload failed.")
+                );
+              }
+            } catch {
+              reject(new Error("Invalid response from server."));
+            }
+          });
+
+          xhr.addEventListener("error", () => {
+            reject(new Error("Could not connect to backend server. Make sure it is running on port 5000."));
+          });
+
+          xhr.addEventListener("abort", () => {
+            reject(new Error("Upload was cancelled."));
+          });
+
+          xhr.send(formData);
+        });
+
+        const result = await uploadPromise;
+        setUploadProgress(100);
+        setUploadResult(result);
+        return result;
+      } catch (uploadError) {
+        console.error(uploadError);
+        setError(uploadError.message || directStorageErr.message || "Something went wrong while uploading.");
+        return null;
+      }
     } finally {
       setIsUploading(false);
     }
@@ -429,12 +466,20 @@ const clearExam = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 print:bg-white">
      <Navbar/>
-       <a
-          href="/history"
-          className=" sticky top-20 z-50  text-xs w-fit ml-2 mt-2 rounded-lg font-semibold text-white  hover:underline flex items-center gap-1 bg-black p-3"
-        >
-           See your whole History
-        </a>
+       <div className="sticky top-20 z-40 flex flex-wrap items-center gap-2 ml-4 mt-2 print:hidden">
+         <a
+            href="/history"
+            className="text-xs rounded-xl font-semibold text-white hover:opacity-90 flex items-center gap-1.5 bg-black px-3.5 py-2 shadow-xs"
+          >
+             See your whole History
+          </a>
+         <Link
+            to="/daily-lecture"
+            className="text-xs rounded-xl font-bold text-white hover:opacity-95 flex items-center gap-1.5 bg-blue-600 px-3.5 py-2 shadow-xs transition hover:bg-blue-700"
+          >
+             <span>Daily Lecture (Audio/Video AI)</span>
+          </Link>
+       </div>
       <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
         {/* ==================================================
             HERO HEADER

@@ -7,6 +7,7 @@ import {
   User,
   LogOut,
   Sparkles,
+  Headphones,
 } from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -17,6 +18,7 @@ const Navbar = () => {
 
   const links = [
     ["Home", "/#home"],
+    ["Daily Lecture", "/daily-lecture"],
     ["Features", "/#features"],
     ["About", "/#about"],
     ["How It Works", "/#How-work"],
@@ -96,13 +98,23 @@ const Navbar = () => {
                 </div>
               </div>
 
+              {/* Daily Lecture Link */}
+              <Link
+                to="/daily-lecture"
+                onClick={closeMenu}
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3.5 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 shadow-2xs"
+                title="Lecture Intelligence"
+              >
+                <Headphones size={16} />
+                <span>Daily Lecture</span>
+              </Link>
+
               {/* Quick Generator Link */}
               <Link
                 to="/work"
                 onClick={closeMenu}
                 className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
               >
-                
                 <span>Start Learning</span>
               </Link>
 
