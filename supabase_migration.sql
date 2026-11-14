@@ -378,6 +378,27 @@ CREATE POLICY "Settings service role only" ON public.platform_settings
   FOR ALL USING (false);
 
 -- ============================================================
+-- 10.6 TABLE: public.password_reset_codes
+-- Stores 6-digit verification codes for Gmail password recovery
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.password_reset_codes (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       TEXT NOT NULL,
+  code        TEXT NOT NULL,
+  expires_at  TIMESTAMPTZ NOT NULL,
+  used        BOOLEAN NOT NULL DEFAULT false,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reset_codes_email ON public.password_reset_codes(LOWER(email), created_at DESC);
+
+ALTER TABLE public.password_reset_codes ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Reset codes service role only" ON public.password_reset_codes;
+CREATE POLICY "Reset codes service role only" ON public.password_reset_codes
+  FOR ALL USING (false);
+
+-- ============================================================
 -- 11. AI STUDY PLANNER & EXAM SCHEDULER TABLES
 -- ============================================================
 

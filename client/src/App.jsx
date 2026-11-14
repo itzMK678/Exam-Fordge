@@ -5,6 +5,8 @@ import Mainpage from './Front-Page/Mainpage.jsx';
 import './App.css';
 import Login from './Front-Page/Auth/Login.jsx';
 import Signup from './Front-Page/Auth/Signup.jsx';
+import ForgotPassword from './Front-Page/Auth/ForgotPassword.jsx';
+import AuthCallback from './Front-Page/Auth/AuthCallback.jsx';
 import UploadPage from './working-pages/UploadPage.jsx';
 import ProtectedRoute from './working-pages/ProtectedRoute.jsx';
 import HistoryPage from './working-pages/HistoryPage.jsx';
@@ -30,6 +32,8 @@ function App() {
             <Route path="/" element={<Mainpage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/boss" element={<BossAdminDashboard />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<h1>Dashboard</h1>} />

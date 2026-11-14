@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GraduationCap, Mail, Lock, Eye, EyeOff, ArrowRight, LogIn } from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -92,6 +93,17 @@ export default function Login() {
 
       {/* RIGHT SECTION - LOGIN FORM */}
       <div className="w-full md:w-1/2 rounded-b-2xl md:rounded-r-2xl md:rounded-r-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8 shadow-2xl">
+        {/* Google Sign-in Option */}
+        <div className="mb-6 space-y-4">
+          <GoogleSignInButton text="Sign in with Google" />
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-slate-800" />
+            <span className="bg-slate-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              or sign in with email
+            </span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 

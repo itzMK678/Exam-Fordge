@@ -12,6 +12,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
+import GoogleSignInButton from "./GoogleSignInButton";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -96,6 +97,18 @@ return (
           </span>
           Exam<span className="text-blue-400">Forge</span>
         </a>
+
+        {/* Google Sign-up Option */}
+        <div className="mb-6 space-y-4">
+          <GoogleSignInButton text="Sign up with Google" />
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-slate-800" />
+            <span className="bg-slate-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              or register with email
+            </span>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
