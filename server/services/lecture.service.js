@@ -266,7 +266,7 @@ Return ONLY a valid, parseable JSON object with the following structure:
 
     const part = createPartFromUri(uploadedGeminiFile.uri, uploadedGeminiFile.mimeType || detectedMime);
 
-    const modelName = env.geminiGenerationModel || "gemini-3.8-flash";
+    const modelName = env.geminiGenerationModel || "gemini-3.5-flash-lite";
     const result = await ai.models.generateContent({
       model: modelName,
       contents: [
@@ -527,7 +527,7 @@ INSTRUCTIONS:
 4. If the question asks about something that was NOT covered or mentioned in this lecture, politely clarify that the instructor did not discuss it in this session. Do NOT invent or hallucinate answers.
 5. Keep explanations clear, engaging, and pedagogically helpful.`;
 
-  const modelName = env.geminiGenerationModel || "gemini-3.8-flash";
+  const modelName = env.geminiGenerationModel || "gemini-3.5-flash-lite";
   const result = await ai.models.generateContent({
     model: modelName,
     contents: [{ text: prompt }],
@@ -627,7 +627,7 @@ Return ONLY a valid JSON object matching this schema:
   ]
 }`;
 
-  const modelName = env.geminiGenerationModel || "gemini-3.8-flash";
+  const modelName = env.geminiGenerationModel || "gemini-3.5-flash-lite";
   const result = await ai.models.generateContent({
     model: modelName,
     contents: [{ text: prompt }],

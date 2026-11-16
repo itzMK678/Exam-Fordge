@@ -8,8 +8,8 @@ const ai = new GoogleGenAI({
   apiKey: env.geminiApiKey,
 });
 
-const GENERATION_MODEL = env.geminiGenerationModel || "gemini-3.8-flash";
-const FALLBACK_MODEL = env.geminiFallbackModel || "gemini-3.8-flash-lite";
+const GENERATION_MODEL = env.geminiGenerationModel || "gemini-3.5-flash-lite";
+const FALLBACK_MODEL = env.geminiFallbackModel || "gemini-3.5-flash";
 
 async function generateWithRetry({ prompt, responseMimeType }) {
   try {

@@ -50,10 +50,10 @@ export const env = {
   ),
 
   geminiGenerationModel:
-    process.env.GEMINI_GENERATION_MODEL || "gemini-3.8-flash",
+    process.env.GEMINI_GENERATION_MODEL || "gemini-3.5-flash-lite",
 
   geminiFallbackModel:
-    process.env.GEMINI_FALLBACK_MODEL || "gemini-3.8-flash-lite",
+    process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash",
 
   maxConcurrentGeminiRequests: Number(
     process.env.MAX_CONCURRENT_GEMINI_REQUESTS || 2

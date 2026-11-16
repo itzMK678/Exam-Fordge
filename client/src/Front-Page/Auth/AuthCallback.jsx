@@ -18,16 +18,36 @@ export default function AuthCallback() {
         const search = window.location.search.substring(1);
 
         const params = new URLSearchParams(hash || search);
+        const code = params.get("code");
         const accessToken = params.get("access_token");
         const refreshToken = params.get("refresh_token");
-        const errorDescription = params.get("error_description");
+        const errorDescription = params.get("error_description") || params.get("error");
 
         if (errorDescription) {
           throw new Error(errorDescription.replace(/\+/g, " "));
         }
 
-        if (!accessToken) {
-          // If no token in URL, check if backend session exists
+        let res;
+
+        // 1. Direct Google Authorization Code flow
+        if (code) {
+          const callbackUri = window.location.origin + window.location.pathname;
+          res = await fetch(`${API_URL}/api/auth/google-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ code, redirect_uri: callbackUri }),
+          });
+        } else if (accessToken) {
+          // 2. Supabase OAuth Access Token flow
+          res = await fetch(`${API_URL}/api/auth/google-session`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ access_token: accessToken, refresh_token: refreshToken }),
+          });
+        } else {
+          // Check existing session
           const checkRes = await fetch(`${API_URL}/api/auth/me`, { credentials: "include" });
           if (checkRes.ok) {
             const checkJson = await checkRes.json();
@@ -37,16 +57,8 @@ export default function AuthCallback() {
               return;
             }
           }
-          throw new Error("No authentication credentials found in Google response.");
+          throw new Error("No authentication code or token received from Google.");
         }
-
-        // 2. Exchange token with our backend to set standard HTTP-Only cookie & upsert user
-        const res = await fetch(`${API_URL}/api/auth/google-session`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ access_token: accessToken, refresh_token: refreshToken }),
-        });
 
         const json = await res.json();
         if (!res.ok || !json.success) {

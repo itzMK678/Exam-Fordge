@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import axios from "axios";
 import { supabase } from "../services/supabase.service.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { authLimiter } from "../middleware/rateLimiter.middleware.js";
@@ -286,11 +287,41 @@ router.get("/me", requireAuth, (req, res) => {
 });
 
 // ===================================================
+// GET /api/auth/google/config (Public config for Google Auth)
+// ===================================================
+router.get("/google/config", (req, res) => {
+  res.json({
+    success: true,
+    clientId: process.env.GOOGLE_CLIENT_ID || "",
+  });
+});
+
+// ===================================================
 // GET /api/auth/google (Initiates Google OAuth)
 // ===================================================
 router.get("/google", async (req, res) => {
   try {
     const frontendUrl = env.corsOrigin || "http://localhost:5173";
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+
+    // 1. If GOOGLE_CLIENT_ID is provided, use direct Google OAuth2
+    if (clientId) {
+      const redirectUri = `${frontendUrl}/auth/callback`;
+      const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+      googleAuthUrl.searchParams.set("client_id", clientId);
+      googleAuthUrl.searchParams.set("redirect_uri", redirectUri);
+      googleAuthUrl.searchParams.set("response_type", "code");
+      googleAuthUrl.searchParams.set("scope", "openid email profile");
+      googleAuthUrl.searchParams.set("access_type", "offline");
+      googleAuthUrl.searchParams.set("prompt", "select_account");
+
+      if (req.query.format === "json") {
+        return res.json({ success: true, url: googleAuthUrl.toString(), directGoogle: true });
+      }
+      return res.redirect(googleAuthUrl.toString());
+    }
+
+    // 2. Otherwise fallback to Supabase OAuth
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -305,7 +336,7 @@ router.get("/google", async (req, res) => {
     if (error) throw error;
 
     if (req.query.format === "json") {
-      return res.json({ success: true, url: data.url });
+      return res.json({ success: true, url: data.url, directGoogle: false });
     }
 
     return res.redirect(data.url);
@@ -314,6 +345,217 @@ router.get("/google", async (req, res) => {
       success: false,
       message: error.message || "Failed to initialize Google Sign-In.",
     });
+  }
+});
+
+// ===================================================
+// POST /api/auth/google-code (Direct Google Auth code exchange)
+// ===================================================
+router.post("/google-code", async (req, res) => {
+  try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "Server configuration error: JWT secret is not configured.",
+      });
+    }
+
+    const { code, redirect_uri } = req.body;
+    if (!code) {
+      return res.status(400).json({
+        success: false,
+        message: "Authorization code is required.",
+      });
+    }
+
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const frontendUrl = env.corsOrigin || "http://localhost:5173";
+    const callbackUri = redirect_uri || `${frontendUrl}/auth/callback`;
+
+    if (!clientId || !clientSecret) {
+      return res.status(500).json({
+        success: false,
+        message: "Google OAuth credentials not configured on server.",
+      });
+    }
+
+    // 1. Exchange code for tokens with Google
+    const tokenRes = await axios.post(
+      "https://oauth2.googleapis.com/token",
+      new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: callbackUri,
+        grant_type: "authorization_code",
+      }).toString(),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
+
+    const { access_token } = tokenRes.data;
+
+    // 2. Fetch user profile from Google
+    const userRes = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const googleUser = userRes.data;
+    const email = String(googleUser.email || "").toLowerCase().trim();
+    const name = googleUser.name || email.split("@")[0] || "Student";
+    const googleId = googleUser.sub;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Unable to retrieve email from Google profile.",
+      });
+    }
+
+    // 3. Upsert user in public.users
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id, name, email, is_blocked")
+      .ilike("email", email)
+      .maybeSingle();
+
+    if (existingUser?.is_blocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been deactivated. Please contact support.",
+      });
+    }
+
+    let finalUser = null;
+
+    if (!existingUser) {
+      const newUserId = crypto.randomUUID();
+      const newUser = {
+        id: newUserId,
+        name,
+        email,
+        password: "[managed_by_google_oauth]",
+        is_blocked: false,
+        last_active_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      await supabase.from("users").insert(newUser);
+      finalUser = { id: newUserId, name, email };
+    } else {
+      await supabase
+        .from("users")
+        .update({ last_active_at: new Date().toISOString() })
+        .eq("id", existingUser.id);
+      finalUser = { id: existingUser.id, name: existingUser.name, email: existingUser.email };
+    }
+
+    // 4. Issue JWT token & set cookie
+    const token = jwt.sign(
+      { id: finalUser.id, email: finalUser.email, name: finalUser.name },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("auth_token", token, COOKIE_OPTIONS);
+
+    return res.json({
+      success: true,
+      message: "Signed in with Google successfully.",
+      user: finalUser,
+    });
+  } catch (error) {
+    console.error("[Google Code Exchange Error]:", error.response?.data || error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.response?.data?.error_description || error.message || "Google authentication failed.",
+    });
+  }
+});
+
+// ===================================================
+// GET /api/auth/google/callback (Direct backend redirect callback)
+// ===================================================
+router.get("/google/callback", async (req, res) => {
+  const { code, error } = req.query;
+  const frontendUrl = env.corsOrigin || "http://localhost:5173";
+
+  if (error || !code) {
+    return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(error || "Google authorization was cancelled")}`);
+  }
+
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = `${req.protocol}://${req.get("host")}/api/auth/google/callback`;
+
+    const tokenRes = await axios.post(
+      "https://oauth2.googleapis.com/token",
+      new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }).toString(),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
+
+    const { access_token } = tokenRes.data;
+    const userRes = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${access_token}` },
+    });
+
+    const googleUser = userRes.data;
+    const email = String(googleUser.email || "").toLowerCase().trim();
+    const name = googleUser.name || email.split("@")[0] || "Student";
+
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id, name, email, is_blocked")
+      .ilike("email", email)
+      .maybeSingle();
+
+    if (existingUser?.is_blocked) {
+      return res.redirect(`${frontendUrl}/login?error=account_deactivated`);
+    }
+
+    let finalUser = null;
+    if (!existingUser) {
+      const newUserId = crypto.randomUUID();
+      const newUser = {
+        id: newUserId,
+        name,
+        email,
+        password: "[managed_by_google_oauth]",
+        is_blocked: false,
+        last_active_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      await supabase.from("users").insert(newUser);
+      finalUser = { id: newUserId, name, email };
+    } else {
+      await supabase
+        .from("users")
+        .update({ last_active_at: new Date().toISOString() })
+        .eq("id", existingUser.id);
+      finalUser = { id: existingUser.id, name: existingUser.name, email: existingUser.email };
+    }
+
+    const token = jwt.sign(
+      { id: finalUser.id, email: finalUser.email, name: finalUser.name },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("auth_token", token, COOKIE_OPTIONS);
+    return res.redirect(`${frontendUrl}/work`);
+  } catch (err) {
+    console.error("[Google Backend Callback Error]:", err.response?.data || err.message);
+    return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(err.message || "Google login failed")}`);
   }
 });
 

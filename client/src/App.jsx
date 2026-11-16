@@ -1,19 +1,20 @@
 
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Mainpage from './Front-Page/Mainpage.jsx';
 import './App.css';
-import Login from './Front-Page/Auth/Login.jsx';
-import Signup from './Front-Page/Auth/Signup.jsx';
-import ForgotPassword from './Front-Page/Auth/ForgotPassword.jsx';
-import AuthCallback from './Front-Page/Auth/AuthCallback.jsx';
-import UploadPage from './working-pages/UploadPage.jsx';
 import ProtectedRoute from './working-pages/ProtectedRoute.jsx';
-import HistoryPage from './working-pages/HistoryPage.jsx';
-import DailyLecturePage from './Lecture-Intelligence/DailyLecturePage.jsx';
 import { ExamProvider } from "./Context/ExamContent";
 import { AuthProvider } from "./Context/AuthContext";
 
+// Lazy-loaded routes for instant initial page loading & optimal code splitting
+const Mainpage = lazy(() => import('./Front-Page/Mainpage.jsx'));
+const Login = lazy(() => import('./Front-Page/Auth/Login.jsx'));
+const Signup = lazy(() => import('./Front-Page/Auth/Signup.jsx'));
+const ForgotPassword = lazy(() => import('./Front-Page/Auth/ForgotPassword.jsx'));
+const AuthCallback = lazy(() => import('./Front-Page/Auth/AuthCallback.jsx'));
+const UploadPage = lazy(() => import('./working-pages/UploadPage.jsx'));
+const HistoryPage = lazy(() => import('./working-pages/HistoryPage.jsx'));
+const DailyLecturePage = lazy(() => import('./Lecture-Intelligence/DailyLecturePage.jsx'));
 const BossAdminDashboard = lazy(() => import('./Admin-Dashboard/BossAdminDashboard.jsx'));
 const StudyPlannerPage = lazy(() => import('./Study-Planner/StudyPlannerPage.jsx'));
 
