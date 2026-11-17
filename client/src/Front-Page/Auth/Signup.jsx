@@ -99,16 +99,7 @@ return (
         </a>
 
         {/* Google Sign-up Option */}
-        <div className="mb-6 space-y-4">
-          <GoogleSignInButton text="Sign up with Google" />
-
-          <div className="relative flex items-center justify-center">
-            <div className="w-full border-t border-slate-800" />
-            <span className="bg-slate-900 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              or register with email
-            </span>
-          </div>
-        </div>
+       
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -250,7 +241,14 @@ return (
           Join us and get started today. Create your account to access
           exams, quizzes, and other learning resources.
         </p>
+ <div className="mb-6 space-y-4">
+          <GoogleSignInButton text="Sign up with Google" bg-slate-400 />
 
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-slate-200" />
+           
+          </div>
+        </div>
         <p className="mt-7 text-center text-sm text-black">
           Already have an account?{" "}
           <Link
