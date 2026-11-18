@@ -30,7 +30,7 @@ import StudyAnalyticsView from "./components/StudyAnalyticsView";
 import RescheduleModal from "./components/RescheduleModal";
 import StudyAssistantChat from "./components/StudyAssistantChat";
 
-export default function StudyPlannerPage() {
+export default function StudyPlannerPage({ hideNavbar = false }) {
   const [plans, setPlans] = useState([]);
   const [activePlanId, setActivePlanId] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
@@ -157,7 +157,7 @@ export default function StudyPlannerPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
 
       {/* Sticky Secondary Action Bar */}
       <div className="sticky top-20 z-30 border-b border-slate-200 bg-white/90 px-4 py-2.5 backdrop-blur-md sm:px-8">

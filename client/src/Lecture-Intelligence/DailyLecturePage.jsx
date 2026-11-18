@@ -30,7 +30,7 @@ import LectureStudyMaterialModal from "./components/LectureStudyMaterialModal";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export default function DailyLecturePage() {
+export default function DailyLecturePage({ hideNavbar = false }) {
   const navigate = useNavigate();
   const [lectures, setLectures] = useState([]);
   const [selectedLecture, setSelectedLecture] = useState(null);
@@ -147,7 +147,7 @@ export default function DailyLecturePage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         {/* Top Header Banner */}

@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   GraduationCap,
   Menu,
   X,
   User,
   LogOut,
-  Sparkles,
-  Headphones,
-  Calendar,
+  Layers,
+  History,
 } from "lucide-react";
 import { useAuth } from "../../Context/AuthContext";
 
@@ -16,11 +15,10 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const links = [
     ["Home", "/#home"],
-    ["Daily Lecture", "/daily-lecture"],
-    ["Study Planner", "/study-planner"],
     ["Features", "/#features"],
     ["About", "/#about"],
     ["How It Works", "/#How-work"],
@@ -100,35 +98,29 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Daily Lecture Link */}
+              {/* History Link */}
               <Link
-                to="/daily-lecture"
+                to="/history"
                 onClick={closeMenu}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50/80 px-3.5 py-2 text-sm font-bold text-indigo-700 transition hover:bg-indigo-100 shadow-2xs"
-                title="Lecture Intelligence"
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 shadow-2xs"
+                title="Your Exam & Activity History"
               >
-                <Headphones size={16} />
-                <span>Daily Lecture</span>
+                <History size={16} />
+                <span>History</span>
               </Link>
 
-              {/* AI Study Planner Link */}
-              <Link
-                to="/study-planner"
-                onClick={closeMenu}
-                className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50/80 px-3.5 py-2 text-sm font-bold text-blue-700 transition hover:bg-blue-100 shadow-2xs"
-                title="AI Study Planner & Exam Scheduler"
-              >
-                <Calendar size={16} />
-                <span>Study Planner</span>
-              </Link>
-
-              {/* Quick Generator Link */}
+              {/* Central Workspace Link */}
               <Link
                 to="/work"
                 onClick={closeMenu}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 shadow-xs"
+                className={`flex items-center justify-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold transition shadow-xs ${
+                  location.pathname === "/work"
+                    ? "bg-blue-700 text-white shadow-blue-500/20"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
               >
-                <span>Start Learning</span>
+                <Layers size={16} />
+                <span>Workspace</span>
               </Link>
 
               {/* Logout Option */}

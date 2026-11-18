@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 // =========================================================================
 // MAIN COMPONENT
 // =========================================================================
-export default function UploadPage({ onExamGenerated }) {
+export default function UploadPage({ onExamGenerated, hideNavbar = false }) {
   // -----------------------------------------------------------------------
   // EXAM STATE (Self-contained, no external context required)
   // -----------------------------------------------------------------------
@@ -465,28 +465,8 @@ const clearExam = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 print:bg-white">
-     <Navbar/>
-       <div className="sticky top-20 z-40 flex flex-wrap items-center gap-2 ml-4 mt-2 print:hidden">
-         <a
-            href="/history"
-            className="text-xs rounded-xl font-semibold text-white hover:opacity-90 flex items-center gap-1.5 bg-black px-3.5 py-2 shadow-xs"
-          >
-             See your whole History
-          </a>
-         <Link
-            to="/daily-lecture"
-            className="text-xs rounded-xl font-bold text-white hover:opacity-95 flex items-center gap-1.5 bg-blue-600 px-3.5 py-2 shadow-xs transition hover:bg-blue-700"
-          >
-             <span>Daily Lecture (Audio/Video AI)</span>
-          </Link>
-         <Link
-            to="/study-planner"
-            className="text-xs rounded-xl font-bold text-white hover:opacity-95 flex items-center gap-1.5 bg-indigo-600 px-3.5 py-2 shadow-xs transition hover:bg-indigo-700"
-          >
-             <span>AI Study Planner & Exam Scheduler</span>
-          </Link>
-       </div>
-      <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 sm:py-14 print:py-4">
+      {!hideNavbar && <Navbar />}
+      <main className="mx-auto max-w-4xl px-5 py-8 sm:px-6 sm:py-10 print:py-4">
         {/* ==================================================
             HERO HEADER
         ================================================== */}
