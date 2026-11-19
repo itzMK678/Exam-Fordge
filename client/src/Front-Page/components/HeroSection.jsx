@@ -20,15 +20,16 @@ const HeroSection = () => {
            
 
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Turn Your Study Materials Into{" "}
-              <span className="text-blue-600">Success</span>
-            </h1>
+  Your Entire Study Journey,{" "}
+  <span className="text-blue-600">Powered by AI</span>
+</h1>
 
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
-              Upload your PDF or DOCX files and let ExamForge create
-              customized exams, provide summaries, and help you learn with an
-              AI tutor — all in one place.
-            </p>
+<p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
+  Transform your PDFs, DOCX files, and lecture recordings into a smarter
+  learning experience. Generate customized exams, explore AI-powered
+  summaries and tutoring, extract important lecture points and announced
+  dates, and create personalized study schedules — all in one place.
+</p>
 
             <div
               id="get-started"

@@ -1,20 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
-  FileText,
+  
   Headphones,
   Calendar,
-  Sparkles,
-  Layers,
   GraduationCap,
-  History,
   CheckCircle2,
-  Clock,
-  Zap,
-  BookOpen,
-  ArrowRight,
-  ShieldCheck,
-  FileCheck,
 } from "lucide-react";
 import Navbar from "../Front-Page/components/Navbar";
 import UploadPage from "./UploadPage";
@@ -38,10 +29,15 @@ export default function WorkPage({ defaultTab = "exam" }) {
     }
   }, [urlTab]);
 
-  const handleSelectTab = (tabId) => {
-    setActiveTab(tabId);
-    setSearchParams({ tab: tabId }, { replace: true });
-  };
+ const handleSelectTab = (tabId) => {
+  setActiveTab(tabId);
+  setSearchParams({ tab: tabId }, { replace: true });
+
+  window.scrollBy({
+    top: 80, // Scroll down 80px
+    behavior: "smooth",
+  });
+};
 
   const tabs = [
     {
@@ -49,9 +45,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
       title: "Generate Exam from PDF",
       shortLabel: "Exam Generator",
       badge: "Document AI",
-      description:
-        "Upload textbooks, notes or slides to generate customized exam papers with page citations and tutor discussion.",
-      icon: GraduationCap,
+       icon: GraduationCap,
       color: "indigo",
       activeBg: "bg-indigo-600 text-white shadow-md shadow-indigo-600/25",
       inactiveBg: "bg-white text-slate-700 hover:bg-slate-50 border-slate-200",
@@ -60,11 +54,9 @@ export default function WorkPage({ defaultTab = "exam" }) {
     },
     {
       id: "lecture",
-      title: "Daily Lecture",
+      title: "Use Recorded Lectures to Study",
       shortLabel: "Lecture Intelligence",
       badge: "Audio & Video AI",
-      description:
-        "Upload classroom audio/video recordings for timestamped notes, conceptual summaries, and classroom AI tutor.",
       icon: Headphones,
       color: "blue",
       activeBg: "bg-blue-600 text-white shadow-md shadow-blue-600/25",
@@ -74,11 +66,9 @@ export default function WorkPage({ defaultTab = "exam" }) {
     },
     {
       id: "planner",
-      title: "Study Planner",
+      title: "Create Study Plane for Multiple Exams",
       shortLabel: "Syllabus & Timetable",
       badge: "Exam Scheduler",
-      description:
-        "Map syllabus topics against course resources and auto-generate balanced, adaptive daily preparation timetables.",
       icon: Calendar,
       color: "emerald",
       activeBg: "bg-emerald-600 text-white shadow-md shadow-emerald-600/25",
@@ -101,11 +91,11 @@ export default function WorkPage({ defaultTab = "exam" }) {
       <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md pt-6 pb-5 shadow-2xs print:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Header Title & Subtitle */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className=" gap-4 mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center  gap-2 mb-1.5">
                 <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
-                  <Layers size={14} />
+                 <GraduationCap size={16} />
                 </span>
                 <span className="text-xs font-black uppercase tracking-wider text-blue-600">
                   ExamForge Studio Workspace
@@ -120,7 +110,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
             </div>
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2.5">
+            {/* <div className="flex items-center gap-2.5">
               <Link
                 to="/history"
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 shadow-2xs"
@@ -129,7 +119,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
                 <History size={15} />
                 <span>Saved Exams</span>
               </Link>
-            </div>
+            </div> */}
           </div>
 
           {/* =====================================================================
@@ -195,10 +185,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
                     {tab.title}
                   </h2>
 
-                  {/* Description */}
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">
-                    {tab.description}
-                  </p>
+                 
 
                   {/* Bottom selection indicator underline */}
                   <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold">
@@ -209,9 +196,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
                     >
                       {isSelected ? "● Active Studio" : "Click to Switch"}
                     </span>
-                    <span className="text-slate-400 group-hover:translate-x-0.5 transition-transform">
-                      →
-                    </span>
+                   
                   </div>
                 </button>
               );
@@ -221,106 +206,7 @@ export default function WorkPage({ defaultTab = "exam" }) {
           {/* =====================================================================
               DYNAMIC OPTION TOOLBAR (Changes dynamically based on active option)
           ===================================================================== */}
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5 sm:p-4">
-            {activeTab === "exam" && (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 font-bold shrink-0">
-                    <FileText size={15} />
-                  </span>
-                  <div>
-                    <span className="font-bold text-slate-800 block sm:inline">
-                      Dynamic Option: Exam Configuration
-                    </span>
-                    <span className="text-slate-500 sm:ml-2 text-[11px]">
-                      Accepts PDF & DOCX · Proportional question distribution across multiple files
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-indigo-50 border border-indigo-200/80 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
-                    4-Choice MCQs
-                  </span>
-                  <span className="rounded-lg bg-indigo-50 border border-indigo-200/80 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
-                    Short Answer
-                  </span>
-                  <span className="rounded-lg bg-indigo-50 border border-indigo-200/80 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
-                    Long Essay
-                  </span>
-                  <span className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                    Verified Citations
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "lecture" && (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700 font-bold shrink-0">
-                    <Headphones size={15} />
-                  </span>
-                  <div>
-                    <span className="font-bold text-slate-800 block sm:inline">
-                      Dynamic Option: Daily Lecture Intelligence
-                    </span>
-                    <span className="text-slate-500 sm:ml-2 text-[11px]">
-                      Supports MP3, WAV, M4A, MP4 · Max 500MB per recording
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-                    Timestamp Citations [MM:SS]
-                  </span>
-                  <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-                    Executive Summary
-                  </span>
-                  <span className="rounded-lg bg-blue-50 border border-blue-200/80 px-2.5 py-1 text-[11px] font-bold text-blue-700">
-                    AI Classroom Chat
-                  </span>
-                  <span className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                    1-Click Exam Export
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "planner" && (
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 font-bold shrink-0">
-                    <Calendar size={15} />
-                  </span>
-                  <div>
-                    <span className="font-bold text-slate-800 block sm:inline">
-                      Dynamic Option: Multi-Exam Study Scheduler
-                    </span>
-                    <span className="text-slate-500 sm:ml-2 text-[11px]">
-                      Syllabus gap detection · Topic dependency ordering · Realistic daily study hours
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                    Daily Timetables
-                  </span>
-                  <span className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                    Calendar View
-                  </span>
-                  <span className="rounded-lg bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
-                    Syllabus Coverage
-                  </span>
-                  <span className="rounded-lg bg-indigo-50 border border-indigo-200/80 px-2.5 py-1 text-[11px] font-bold text-indigo-700">
-                    AI Study Assistant
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+         
         </div>
       </header>
 

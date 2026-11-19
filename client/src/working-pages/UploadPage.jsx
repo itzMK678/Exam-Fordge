@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import Navbar from "../Front-Page/components/Navbar";
 import SummaryPanel from "../components/SummaryPanel";
+import { History } from "lucide-react";
 import { useExam } from "../Context/ExamContent";
 import AnswerPanel from "../components/AnswerPanel";
 import { uploadDocumentDirect } from "../Lecture-Intelligence/services/storageUpload";
@@ -470,8 +471,19 @@ const clearExam = () => {
         {/* ==================================================
             HERO HEADER
         ================================================== */}
+          
         <section className="mb-10 text-center print:hidden">
-         
+        
+        <div className=" absolute z-2"><Link
+                to="/history"
+                
+                className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-blue-700 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-slate-100 hover:text-slate-900 shadow-2xs"
+                title="Your Exam & Activity History"
+              >
+                <History size={16} />
+                <span>History</span>
+              </Link> 
+              </div> 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 sm:text-5xl">
             Create exams <br />
             <span className="text-indigo-600">from your documents & PDFs</span>

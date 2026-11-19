@@ -1,31 +1,43 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import {Brain,ArrowRight,UploadCloud,
-  Target,
+import {Brain,ArrowRight,
+  
+  LogIn,
+  LayoutDashboard,
+  UploadCloud,
+  Sparkles,
 } from "lucide-react";
 const WorkGuide = () => {
    const steps = [
-    {
-      number: "01",
-      icon: UploadCloud,
-      title: "Upload Your Material",
-      description: "Choose your PDF or DOCX study documents.",
-    },
-    {
-      number: "02",
-      icon: Brain,
-      title: "Let AI Understand",
-      description:
-        "Your content is processed to provide relevant context.",
-    },
-    {
-      number: "03",
-      icon: Target,
-      title: "Learn and Practice",
-      description:
-        "Generate exams, review answers, and chat with your AI tutor.",
-    },
-  ];
+  {
+    number: "01",
+    icon: LogIn,
+    title: "Sign In to ExamForge",
+    description:
+      "Create an account or log in to access your personalized ExamForge learning workspace.",
+  },
+  {
+    number: "02",
+    icon: LayoutDashboard,
+    title: "Open Your Workspace",
+    description:
+      "Click the Workspace button and choose the feature you want, such as exam generation, study planning, lecture analysis, summaries, or AI tutoring.",
+  },
+  {
+    number: "03",
+    icon: UploadCloud,
+    title: "Upload Your Study Material",
+    description:
+      "Upload your PDF or DOCX documents, provide the required topics, or submit lecture recordings depending on your selected feature.",
+  },
+  {
+    number: "04",
+    icon: Sparkles,
+    title: "Get Your AI Results",
+    description:
+      "Let ExamForge process your content and generate personalized exams, study schedules, lecture insights, summaries, or AI-powered learning assistance.",
+  },
+];
 
   return (
     <div id='How-work'>

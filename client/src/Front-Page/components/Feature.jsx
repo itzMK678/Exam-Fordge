@@ -10,40 +10,55 @@ import {
   GraduationCap,
   Sparkles,
   ArrowRight,
+  BookOpen,
   CheckCircle2,
 } from "lucide-react";
 
 const Feature = () => {
-  const features = [
-    {
-      icon: FileText,
-      title: "Upload Your Files",
-      description:
-        "Upload PDF and DOCX documents and turn your study materials into learning resources.",
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      icon: FileCheck,
-      title: "Generate Custom Exams",
-      description:
-        "Create multiple-choice, short-answer, and long-answer questions with answers.",
-      color: "bg-green-100 text-green-600",
-    },
-    {
-      icon: Brain,
-      title: "Document Summaries",
-      description:
-        "Understand lengthy documents faster with concise summaries and key concepts.",
-      color: "bg-purple-100 text-purple-600",
-    },
-    {
-      icon: MessageCircle,
-      title: "AI Chat Tutor",
-      description:
-        "Ask questions about your documents and understand difficult topics.",
-      color: "bg-pink-100 text-pink-600",
-    },
-  ];
+ const features = [
+  {
+    icon: FileText,
+    title: "Upload Study Materials",
+    description:
+      "Upload PDF and DOCX documents to organize your study materials and turn them into AI-powered learning resources.",
+    color: "bg-blue-100 text-blue-600",
+  },
+  {
+    icon: FileCheck,
+    title: "Generate Custom Exams",
+    description:
+      "Generate multiple-choice, short-answer, and long-answer questions with answers based on your study materials.",
+    color: "bg-green-100 text-green-600",
+  },
+  {
+    icon: Brain,
+    title: "AI Study Planner",
+    description:
+      "Create personalized study schedules by analyzing your materials, topics, and remaining days before exams.",
+    color: "bg-purple-100 text-purple-600",
+  },
+  {
+    icon: MessageCircle,
+    title: "AI Lecture Insights",
+    description:
+      "Analyze lecture recordings to extract important discussions, key concepts, and dates or deadlines announced by teachers.",
+    color: "bg-pink-100 text-pink-600",
+  },
+  {
+    icon: BookOpen,
+    title: "Document Summaries",
+    description:
+      "Understand lengthy documents faster with concise AI-generated summaries, important points, and key concepts.",
+    color: "bg-orange-100 text-orange-600",
+  },
+  {
+    icon: MessageCircle,
+    title: "AI Chat Tutor",
+    description:
+      "Ask questions about your uploaded documents, discuss individual questions, and get AI-powered explanations to understand difficult topics.",
+    color: "bg-indigo-100 text-indigo-600",
+  },
+];
 
  
   const actions = [

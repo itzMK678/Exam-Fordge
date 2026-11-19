@@ -18,8 +18,8 @@ const mainpage = () => {
     <>
       <Navbar />
       <HeroSection/>
-      <Feature/>
       <About/>
+       <Feature/>
       <WorkGuide/>
       <Footer />
     </>

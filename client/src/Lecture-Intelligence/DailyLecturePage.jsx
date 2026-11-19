@@ -183,12 +183,7 @@ export default function DailyLecturePage({ hideNavbar = false }) {
         {/* Top Header Banner */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-black text-blue-700">
-                <Sparkles size={13} /> Daily Lecture
-              </span>
-              <span className="text-xs text-slate-400">· Lecture Intelligence Platform</span>
-            </div>
+           
             <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
               Turn Classroom Recordings into Mastered Knowledge
             </h1>
@@ -421,20 +416,11 @@ export default function DailyLecturePage({ hideNavbar = false }) {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to="/work"
-                        className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 py-2 text-xs font-bold text-blue-700 transition hover:bg-blue-100"
-                        title="Use in Exam Generator"
-                      >
-                        <Sparkles size={14} />
-                        <span>Generate Exam From Lecture</span>
-                      </Link>
-                    </div>
+                   
                   </div>
 
                   {/* Feature Navigation Tabs */}
-                  <div className="mt-5 flex gap-1 overflow-x-auto border-t border-slate-100 pt-3">
+                  <div className="mt-5 flex flex-wrap gap-1  border-t border-slate-100 pt-3">
                     {tabs.map((tab) => {
                       const Icon = tab.icon;
                       const isActive = activeTab === tab.id;
@@ -442,7 +428,7 @@ export default function DailyLecturePage({ hideNavbar = false }) {
                         <button
                           key={tab.id}
                           onClick={() => setActiveTab(tab.id)}
-                          className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                          className={`flex border shrink-0 items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
                             isActive
                               ? "bg-blue-600 text-white shadow-xs"
                               : "text-slate-600 hover:bg-slate-100"

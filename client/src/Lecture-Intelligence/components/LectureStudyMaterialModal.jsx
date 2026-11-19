@@ -87,7 +87,7 @@ export default function LectureStudyMaterialModal({
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
-            <Sparkles size={13} /> Active Recall & Study Material
+             Active Recall & Study Material
           </span>
           <h3 className="mt-1 text-xl font-bold text-slate-900">
             Practice Materials & Exam Builder

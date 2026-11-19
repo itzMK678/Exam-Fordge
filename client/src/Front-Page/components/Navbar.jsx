@@ -19,8 +19,8 @@ const Navbar = () => {
 
   const links = [
     ["Home", "/#home"],
-    ["Features", "/#features"],
     ["About", "/#about"],
+    ["Features", "/#features"],
     ["How It Works", "/#How-work"],
   ];
 
@@ -98,7 +98,7 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* History Link */}
+              {/* History Link
               <Link
                 to="/history"
                 onClick={closeMenu}
@@ -107,7 +107,7 @@ const Navbar = () => {
               >
                 <History size={16} />
                 <span>History</span>
-              </Link>
+              </Link> */}
 
               {/* Central Workspace Link */}
               <Link

@@ -26,7 +26,7 @@ export default function LectureNotesPanel({
       {summary && (
         <div className="rounded-3xl border border-blue-200 bg-gradient-to-r from-blue-50/80 to-indigo-50/80 p-6 shadow-xs">
           <div className="mb-2 flex items-center gap-2 text-blue-800">
-            <Sparkles size={18} />
+           
             <h3 className="text-sm font-bold uppercase tracking-wider">
               Lecture Summary
             </h3>

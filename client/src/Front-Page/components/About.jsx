@@ -5,10 +5,11 @@ import {
   FileText,
   Target,
   MessageCircle,
-  Sparkles,
   ArrowRight,
   CheckCircle2,
   GraduationCap,
+  CalendarDays,
+  Mic,
 } from "lucide-react";
 
 const About = () => {
@@ -17,27 +18,41 @@ const About = () => {
       icon: FileText,
       title: "Smart Document Summaries",
       description:
-        "Turn lengthy PDF and DOCX study materials into clear, concise summaries that help you focus on what matters.",
+        "Transform lengthy PDF and DOCX study materials into concise summaries, important points, and key concepts to make learning easier.",
     },
     {
       icon: Target,
-      title: "AI-Powered Exam Practice",
+      title: "AI-Powered Exam Generation",
       description:
-        "Generate personalized practice exams with different difficulty levels to test your knowledge and prepare confidently.",
+        "Generate customized practice exams with multiple-choice, short-answer, and long-answer questions, complete with answers and different difficulty levels.",
+    },
+    {
+      icon: CalendarDays,
+      title: "Personalized Study Planner",
+      description:
+        "Create personalized study schedules based on your uploaded materials, selected topics, and remaining days before exams to stay organized and prepared.",
+    },
+    {
+      icon: Mic,
+      title: "AI Lecture Analysis",
+      description:
+        "Analyze lecture recordings to extract important discussions, key concepts, topics covered, and important dates or deadlines announced by teachers.",
     },
     {
       icon: MessageCircle,
       title: "Your Personal AI Tutor",
       description:
-        "Ask questions about your study material and get helpful explanations to understand difficult concepts.",
+        "Ask questions about your study materials, discuss individual exam questions, and receive AI-powered explanations to understand difficult concepts.",
     },
   ];
 
   const benefits = [
     "Learn directly from your own study materials",
-    "Save time with AI-generated summaries",
-    "Practice with customized exam questions",
-    "Understand concepts with an AI study assistant",
+    "Save time with AI-generated summaries and insights",
+    "Prepare with customized exams and practice questions",
+    "Extract important information and deadlines from lecture recordings",
+    "Create organized study schedules based on exam timelines",
+    "Understand difficult concepts with an AI study assistant",
   ];
 
   return (
@@ -52,17 +67,19 @@ const About = () => {
       <div className="relative mx-auto max-w-7xl">
         {/* Section Heading */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
-         
-
           <h2 className="mt-6 text-3xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
-            Study Smarter with Your
-            <span className="text-indigo-600"> AI Study Partner</span>
+            Study Smarter with Your{" "}
+            <span className="text-indigo-600">
+              AI-Powered Learning Partner
+            </span>
           </h2>
 
           <p className="mt-6 text-base leading-8 text-slate-600 sm:text-lg">
-            ExamForge transforms the way you prepare for exams. Upload your
-            study documents, generate intelligent summaries and practice
-            questions, and learn with an AI tutor — all in one place.
+            ExamForge transforms the way you learn and prepare for exams.
+            Turn study documents and lecture recordings into valuable
+            learning resources, generate customized exams, create
+            personalized study schedules, and get instant help from an
+            AI tutor — all in one place.
           </p>
         </div>
 
@@ -75,14 +92,15 @@ const About = () => {
             </div>
 
             <h3 className="text-2xl font-bold leading-snug text-slate-900 sm:text-3xl">
-              Everything You Need to Prepare with Confidence
+              Everything You Need to Learn, Plan, and Prepare
             </h3>
 
             <p className="mt-5 leading-8 text-slate-600">
-              Studying does not have to mean spending hours searching through
-              notes or creating practice questions manually. ExamForge uses
-              AI to help you organize your learning, test your understanding,
-              and make better use of your study time.
+              Preparing for exams involves more than just reading notes.
+              ExamForge brings your entire learning process together using
+              AI. Understand your study materials, capture important
+              information from lectures, organize your preparation, and
+              test your knowledge — all through one intelligent platform.
             </p>
 
             <div className="mt-8 space-y-4">
@@ -121,11 +139,9 @@ const About = () => {
                   </div>
 
                   <div>
-                    <div className="mb-2 flex items-center gap-3">
-                      <h4 className="font-bold text-slate-900 sm:text-lg">
-                        {feature.title}
-                      </h4>
-                    </div>
+                    <h4 className="mb-2 font-bold text-slate-900 sm:text-lg">
+                      {feature.title}
+                    </h4>
 
                     <p className="text-sm leading-7 text-slate-600 sm:text-base">
                       {feature.description}
@@ -136,9 +152,6 @@ const About = () => {
             })}
           </div>
         </div>
-
-        {/* Bottom Highlight */}
-       
       </div>
     </section>
   );
