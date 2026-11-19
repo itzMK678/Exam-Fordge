@@ -26,9 +26,7 @@ const HeroSection = () => {
 
 <p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
   Transform your PDFs, DOCX files, and lecture recordings into a smarter
-  learning experience. Generate customized exams, explore AI-powered
-  summaries and tutoring, extract important lecture points and announced
-  dates, and create personalized study schedules — all in one place.
+  learning experience. Generate customized exams.Use Ai tutor for learning — all in one place.
 </p>
 
             <div
@@ -53,18 +51,7 @@ const HeroSection = () => {
               </a>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm font-medium text-slate-600">
-              {[
-                "Custom Exams",
-                "Document Summaries",
-                "AI Chat Tutor",
-              ].map((item) => (
-                <span key={item} className="flex items-center gap-2">
-                  <Check size={17} className="text-green-600" />
-                  {item}
-                </span>
-              ))}
-            </div>
+            
           </div>
 
           {/* Hero Visual */}

@@ -6,6 +6,7 @@ import {Brain,ArrowRight,
   LayoutDashboard,
   UploadCloud,
   Sparkles,
+   MousePointerClick,
 } from "lucide-react";
 const WorkGuide = () => {
    const steps = [
@@ -25,13 +26,20 @@ const WorkGuide = () => {
   },
   {
     number: "03",
+    icon:  MousePointerClick,
+    title: "Select Mode",
+    description:
+      "Select mode of your preference",
+  },
+  {
+    number: "04",
     icon: UploadCloud,
     title: "Upload Your Study Material",
     description:
       "Upload your PDF or DOCX documents, provide the required topics, or submit lecture recordings depending on your selected feature.",
   },
   {
-    number: "04",
+    number: "05",
     icon: Sparkles,
     title: "Get Your AI Results",
     description:
