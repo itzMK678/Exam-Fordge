@@ -17,9 +17,11 @@ import {
   TrendingUp,
   AlertCircle,
   FileText,
+  Printer,
 } from "lucide-react";
 
 import CreateStudyPlanWizard from "./components/CreateStudyPlanWizard";
+import SmartScheduleView from "./components/SmartScheduleView";
 import DailyScheduleView from "./components/DailyScheduleView";
 import CalendarScheduleView from "./components/CalendarScheduleView";
 import WeeklyScheduleView from "./components/WeeklyScheduleView";
@@ -37,8 +39,8 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Active view tab: 'daily' | 'calendar' | 'weekly' | 'analysis' | 'subjects' | 'timeline' | 'analytics'
-  const [currentTab, setCurrentTab] = useState("daily");
+  // Active view tab: 'schedule' | 'daily' | 'calendar' | 'weekly' | 'analysis' | 'subjects' | 'timeline' | 'analytics'
+  const [currentTab, setCurrentTab] = useState("schedule");
 
   // Modals & Panels
   const [showCreateWizard, setShowCreateWizard] = useState(false);
@@ -146,12 +148,12 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
   };
 
   const tabs = [
+    { id: "schedule", label: "Smart Study Schedule", icon: Sparkles },
     { id: "daily", label: "Daily Tasks", icon: CheckCircle2 },
     { id: "calendar", label: "Calendar", icon: Calendar },
     { id: "weekly", label: "Weekly Workload", icon: Clock },
     { id: "analysis", label: "Material Analysis", icon: BookOpen },
     { id: "subjects", label: "Subject Progress", icon: Layers },
-    { id: "timeline", label: "Exam Timeline", icon: Flag },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
   ];
 
@@ -201,6 +203,16 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
           <div className="flex items-center gap-2">
             {activePlan && (
               <>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs cursor-pointer print:hidden"
+                  title="Print clean schedule on paper"
+                >
+                  <Printer size={13} className="text-slate-500" />
+                  <span>Print on Paper</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowRescheduleModal(true)}
@@ -316,6 +328,13 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
             </div>
 
             {/* Active View Container */}
+            {currentTab === "schedule" && (
+              <SmartScheduleView
+                plan={activePlan}
+                onTaskUpdated={handleTaskUpdated}
+                onOpenAssistantWithTopic={openAssistantWithTopic}
+              />
+            )}
             {currentTab === "daily" && (
               <DailyScheduleView
                 plan={activePlan}

@@ -17,6 +17,7 @@ import {
   Loader2,
   ChevronRight,
   FileCheck,
+  RefreshCw,
 } from "lucide-react";
 import Navbar from "../Front-Page/components/Navbar";
 import LectureUploadCard from "./components/LectureUploadCard";
@@ -38,6 +39,7 @@ export default function DailyLecturePage({ hideNavbar = false }) {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [activeTab, setActiveTab] = useState("notes"); // 'notes', 'topics', 'transcript', 'nonacademic', 'chat', 'study'
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [retryingId, setRetryingId] = useState(null);
   const [error, setError] = useState("");
 
   // 1. Fetch all lectures
@@ -126,6 +128,34 @@ export default function DailyLecturePage({ hideNavbar = false }) {
       }
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  // 5. Retry failed lecture processing
+  const handleRetryLecture = async (id, e) => {
+    if (e) e.stopPropagation();
+    setRetryingId(id);
+    try {
+      const res = await fetch(`${API_URL}/api/lectures/${id}/retry`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to restart processing.");
+      }
+
+      // Update local state to processing
+      setSelectedLecture((prev) =>
+        prev && prev.id === id ? { ...prev, status: "processing", error_message: null } : prev
+      );
+      setLectures((prev) =>
+        prev.map((l) => (l.id === id ? { ...l, status: "processing", error_message: null } : l))
+      );
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setRetryingId(null);
     }
   };
 
@@ -274,13 +304,27 @@ export default function DailyLecturePage({ hideNavbar = false }) {
                       </div>
                     </div>
 
-                    <button
-                      onClick={(e) => handleDeleteLecture(item.id, e)}
-                      className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-rose-500 transition p-1"
-                      title="Delete recording"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+                      {isFailed && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleRetryLecture(item.id, e)}
+                          disabled={retryingId === item.id}
+                          className="text-rose-500 hover:text-rose-700 transition p-1"
+                          title="Retry AI Analysis"
+                        >
+                          <RefreshCw size={13} className={retryingId === item.id ? "animate-spin" : ""} />
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteLecture(item.id, e)}
+                        className="text-slate-300 hover:text-rose-500 transition p-1"
+                        title="Delete recording"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
@@ -314,15 +358,42 @@ export default function DailyLecturePage({ hideNavbar = false }) {
               <div className="rounded-3xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-800">
                 <AlertCircle size={36} className="mx-auto mb-2 text-rose-500" />
                 <h3 className="text-base font-bold">Lecture Processing Failed</h3>
-                <p className="mt-1 text-xs text-rose-600">
+                <p className="mt-1 text-xs text-rose-600 max-w-md mx-auto">
                   {selectedLecture.error_message || "We could not extract clear audio from this recording."}
                 </p>
-                <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="mt-4 rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-xs"
-                >
-                  Try Uploading Again
-                </button>
+
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleRetryLecture(selectedLecture.id)}
+                    disabled={retryingId === selectedLecture.id}
+                    className="flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700 transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {retryingId === selectedLecture.id ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>Retrying AI Analysis...</span>
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={14} />
+                        <span>Retry AI Analysis</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUploadModal(true);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="flex items-center gap-2 rounded-xl border border-rose-300 bg-white px-4 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100/50 transition cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Upload a Different Recording</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-6">

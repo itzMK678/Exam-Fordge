@@ -3,6 +3,8 @@ import {
   getStudyPlan,
   createStudyPlan,
   updateTaskStatus,
+  addTaskToPlan,
+  extractDocumentTopics,
   smartReschedulePlan,
   chatWithStudyAssistant,
   deleteStudyPlan,
@@ -43,6 +45,36 @@ export async function handleGetStudyPlan(req, res, next) {
   }
 }
 
+/**
+ * Analyze selected/uploaded documents and extract topics and subtopics
+ */
+export async function handleAnalyzeTopics(req, res, next) {
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    let documentIds = req.body.documentIds;
+    if (typeof documentIds === "string") {
+      try {
+        documentIds = JSON.parse(documentIds);
+      } catch {
+        documentIds = [];
+      }
+    }
+
+    const result = await extractDocumentTopics({
+      userId,
+      documentIds: documentIds || [],
+      uploadedFiles: req.files || [],
+    });
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function handleCreateStudyPlan(req, res, next) {
   try {
     const userId = req.user?.id || req.user?.sub;
@@ -54,6 +86,13 @@ export async function handleCreateStudyPlan(req, res, next) {
         payload.exams = JSON.parse(req.body.exams);
       } catch {
         payload.exams = [];
+      }
+    }
+    if (typeof req.body.topics === "string") {
+      try {
+        payload.topics = JSON.parse(req.body.topics);
+      } catch {
+        payload.topics = [];
       }
     }
     if (typeof req.body.preferredDays === "string") {
@@ -73,27 +112,38 @@ export async function handleCreateStudyPlan(req, res, next) {
 
     const {
       title,
+      subject,
       description,
       dailyStudyHours,
       preferredDays,
       exams,
+      topics,
+      daysRemaining,
+      examDate,
       existingDocumentIds,
     } = payload;
 
-    if (!exams || !Array.isArray(exams) || exams.length === 0) {
+    const hasTopics = Array.isArray(topics) && topics.length > 0;
+    const hasExams = Array.isArray(exams) && exams.length > 0;
+
+    if (!hasTopics && !hasExams) {
       return res.status(400).json({
         success: false,
-        message: "At least one upcoming exam or test series is required.",
+        message: "Please provide either exam details or study topics.",
       });
     }
 
     const createdPlan = await createStudyPlan({
       userId,
-      title,
+      title: title || `${subject || "Exam"} Study Plan`,
+      subject: subject || title,
       description,
-      dailyStudyHours: Number(dailyStudyHours) || 3.0,
+      dailyStudyHours: Number(dailyStudyHours) || 2.5,
       preferredDays: preferredDays || ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-      exams,
+      exams: exams || [],
+      topics: topics || [],
+      daysRemaining: daysRemaining ? Number(daysRemaining) : null,
+      examDate,
       existingDocumentIds: existingDocumentIds || [],
       uploadedFiles: req.files || [],
     });
@@ -112,18 +162,30 @@ export async function handleUpdateTaskStatus(req, res, next) {
   try {
     const userId = req.user?.id || req.user?.sub;
     const { taskId } = req.params;
-    const { status, actualMinutes, notes } = req.body;
 
-    const updatedTask = await updateTaskStatus(taskId, userId, {
-      status,
-      actualMinutes,
-      notes,
-    });
+    const updatedTask = await updateTaskStatus(taskId, userId, req.body);
 
     res.json({
       success: true,
       message: "Task updated.",
       data: updatedTask,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleAddTaskToPlan(req, res, next) {
+  try {
+    const userId = req.user?.id || req.user?.sub;
+    const { id } = req.params;
+
+    const task = await addTaskToPlan(id, userId, req.body);
+
+    res.status(201).json({
+      success: true,
+      message: "Topic added to schedule.",
+      data: task,
     });
   } catch (err) {
     next(err);

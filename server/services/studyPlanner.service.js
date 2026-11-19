@@ -145,6 +145,124 @@ export async function getStudyPlan(planId, userId) {
 }
 
 /**
+ * 2b. EXTRACT TOPICS & SUBTOPICS FROM STUDY MATERIALS
+ */
+export async function extractDocumentTopics({
+  userId,
+  documentIds = [],
+  uploadedFiles = [],
+}) {
+  const processedDocRecords = [];
+  const allDocIds = [...documentIds];
+
+  // 1. Process any newly uploaded files
+  if (uploadedFiles && uploadedFiles.length > 0) {
+    for (const file of uploadedFiles) {
+      try {
+        const docResult = await processDocument(file, userId);
+        allDocIds.push(docResult.documentId);
+        processedDocRecords.push({
+          id: docResult.documentId,
+          filename: docResult.filename,
+          pages: docResult.pageCount || 1,
+        });
+      } catch (err) {
+        console.error(`[StudyPlanner] Failed to process document ${file.originalname}:`, err.message);
+      }
+    }
+  }
+
+  if (allDocIds.length === 0) {
+    return { documents: [] };
+  }
+
+  // 2. Fetch document details and page samples
+  const { data: docs } = await supabase
+    .from("documents")
+    .select("id, filename, file_type, page_count")
+    .in("id", allDocIds);
+
+  const documentMap = new Map((docs || []).map((d) => [d.id, d]));
+
+  // Fetch page excerpts for topic identification
+  const { data: pages } = await supabase
+    .from("document_pages")
+    .select("document_id, page_number, content")
+    .in("document_id", allDocIds)
+    .order("page_number", { ascending: true })
+    .limit(100);
+
+  const docContents = {};
+  for (const page of pages || []) {
+    if (!docContents[page.document_id]) docContents[page.document_id] = [];
+    docContents[page.document_id].push(`Page ${page.page_number}: ${(page.content || "").slice(0, 400)}`);
+  }
+
+  const docSummaries = allDocIds.map((docId) => {
+    const doc = documentMap.get(docId) || { filename: "Study Document.pdf" };
+    const samples = (docContents[docId] || []).slice(0, 15).join("\n");
+    return `--- DOCUMENT: "${doc.filename}" (ID: ${docId}) ---\nContent Excerpts:\n${samples || "General study document"}\n`;
+  }).join("\n\n");
+
+  const prompt = `You are ExamForge's Academic Curriculum Specialist.
+Analyze the following uploaded study document(s) and extract the main academic topics and subtopics discussed in each.
+
+For each document:
+1. Identify the high-level chapters / major topics (e.g., "Introduction to DBMS", "Database Architecture", "ER Diagrams", "Relational Model", "Normalization", "SQL Queries", "Transactions", "Concurrency Control").
+2. Under each topic, extract 2-4 key subtopics or concepts.
+3. Keep topic names concise and student-friendly.
+
+DOCUMENTS TO ANALYZE:
+${docSummaries}
+
+Respond ONLY with valid JSON strictly matching this schema:
+{
+  "documents": [
+    {
+      "documentId": "string",
+      "filename": "string",
+      "topics": [
+        {
+          "name": "Topic Name",
+          "subtopics": ["Subtopic 1", "Subtopic 2"]
+        }
+      ]
+    }
+  ]
+}`;
+
+  console.log(`[StudyPlanner] Extracting topics from ${allDocIds.length} documents via Gemini...`);
+  try {
+    const text = await generateWithRetry({
+      prompt,
+      responseMimeType: "application/json",
+    });
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (err) {
+    console.error("[StudyPlanner] Topic extraction failed:", err.message);
+    // Fallback safe topic extraction
+    return {
+      documents: allDocIds.map((id) => {
+        const doc = documentMap.get(id);
+        const name = doc?.filename || "Study Material";
+        const baseName = name.replace(/\.[^/.]+$/, "");
+        return {
+          documentId: id,
+          filename: name,
+          topics: [
+            { name: `Introduction to ${baseName}`, subtopics: ["Key Definitions", "Basic Architecture"] },
+            { name: `Core Principles of ${baseName}`, subtopics: ["Fundamental Models", "Standard Rules"] },
+            { name: `Advanced ${baseName}`, subtopics: ["Practical Applications", "Problem Solving"] },
+            { name: `Practice Questions & Review`, subtopics: ["Exam Questions", "Important Formulas"] },
+          ],
+        };
+      }),
+    };
+  }
+}
+
+/**
  * 3. CREATE STUDY PLAN & RUN AI SYLLABUS / MATERIAL ANALYSIS
  */
 export async function createStudyPlan({
@@ -156,6 +274,10 @@ export async function createStudyPlan({
   exams = [],
   existingDocumentIds = [],
   uploadedFiles = [],
+  topics = [], // Confirmed topics list: [{ name, subtopics, documentName, documentId, priority, difficulty, isManual }]
+  daysRemaining = null,
+  examDate = null,
+  subject = "",
 }) {
   const planId = randomUUID();
   const processedDocIds = [...existingDocumentIds];
@@ -210,7 +332,33 @@ export async function createStudyPlan({
   // Step 3: Run AI Syllabus & Material Analysis via Gemini
   const todayStr = new Date().toISOString().split("T")[0];
 
-  const examsContext = exams.map((e, idx) => `
+  let calculatedExamDate = examDate;
+  if (!calculatedExamDate) {
+    const days = Number(daysRemaining) || 7;
+    const target = new Date();
+    target.setDate(target.getDate() + days);
+    calculatedExamDate = target.toISOString().split("T")[0];
+  }
+
+  const effectiveSubject = subject || title || "Subject Exam";
+
+  let effectiveExams = [...exams];
+  if (!effectiveExams || effectiveExams.length === 0) {
+    effectiveExams = [
+      {
+        exam_name: `${effectiveSubject} Exam`,
+        subject: effectiveSubject,
+        exam_date: calculatedExamDate,
+        test_type: "Exam Preparation",
+        syllabus: topics.map((t) => t.name).join(", ") || "Full course syllabus",
+        included_chapters: "All confirmed topics",
+        difficulty_level: "Medium",
+        additional_instructions: "Distribute confirmed topics logically with exact document connections.",
+      },
+    ];
+  }
+
+  const examsContext = effectiveExams.map((e, idx) => `
 Exam #${idx + 1}:
 - Name: ${e.exam_name}
 - Subject: ${e.subject}
@@ -222,17 +370,33 @@ Exam #${idx + 1}:
 - Special Instructions: ${e.additional_instructions || "None"}
 `).join("\n");
 
+  const userTopicsContext = topics && topics.length > 0
+    ? `\nUSER CONFIRMED TOPICS (From AI extraction & manual entry):\n` +
+      topics
+        .map(
+          (t, idx) =>
+            `${idx + 1}. Topic: "${t.name}" | Subtopics: ${(t.subtopics || []).join(", ") || "Core concepts"} | Source Document: "${t.documentName || (t.isManual ? "Manually Added" : "Study Document")}" | Priority/Difficulty: ${t.priority || t.difficulty || "Medium"}`
+        )
+        .join("\n") +
+      `\n\nSTRICT REQUIREMENT FOR TOPICS:
+1. You MUST schedule every confirmed topic listed above into the day-by-day plan.
+2. In the "tasks" output, connect each topic to its exact "document_name" as specified in the topic's Source Document. If a topic is marked as "Manually Added", set document_name to "Manually Added".
+3. Order prerequisite/fundamental topics on earlier days and advanced/practice topics on later days.
+4. Final days should focus on practice questions, weak topics, and full revision.\n`
+    : "";
+
   const prompt = `You are ExamForge's Lead Academic AI Study Planner & Curriculum Strategist.
 
 A student wants a personalized, realistic, intelligent study schedule and syllabus analysis.
 
 Current Date: ${todayStr}
+Target Exam Date: ${calculatedExamDate} (${daysRemaining || 7} days remaining)
 Available Daily Study Hours: ${dailyStudyHours} hours/day
 Preferred Study Days: ${preferredDays.join(", ")}
 
 UPCOMING EXAMS & TEST SERIES:
 ${examsContext}
-
+${userTopicsContext}
 UPLOADED STUDY MATERIALS & EXTRACTED PAGE SAMPLES:
 ${docContextString || "No specific document samples extracted. Map topics to provided study material or mark missing if unspecified."}
 
@@ -445,24 +609,33 @@ Respond ONLY with valid JSON strictly matching this schema:
 }
 
 /**
- * 4. UPDATE STUDY TASK STATUS / NOTES
+ * 4. UPDATE STUDY TASK (Status, Date/Move Day, Notes, Topic)
  */
-export async function updateTaskStatus(taskId, userId, { status, actualMinutes, notes }) {
+export async function updateTaskStatus(taskId, userId, updateData = {}) {
   try {
     const updatePayload = {
       updated_at: new Date().toISOString(),
     };
 
-    if (status !== undefined) {
-      updatePayload.status = status;
-      if (status === "completed") {
+    if (updateData.status !== undefined) {
+      updatePayload.status = updateData.status;
+      if (updateData.status === "completed") {
         updatePayload.completed_at = new Date().toISOString();
       } else {
         updatePayload.completed_at = null;
       }
     }
-    if (actualMinutes !== undefined) updatePayload.actual_minutes = Number(actualMinutes);
-    if (notes !== undefined) updatePayload.notes = notes;
+    if (updateData.actualMinutes !== undefined) updatePayload.actual_minutes = Number(updateData.actualMinutes);
+    if (updateData.notes !== undefined) updatePayload.notes = updateData.notes;
+    if (updateData.scheduled_date !== undefined) {
+      updatePayload.scheduled_date = updateData.scheduled_date;
+      updatePayload.day_of_week = getDayName(updateData.scheduled_date);
+    }
+    if (updateData.topic !== undefined) updatePayload.topic = updateData.topic;
+    if (updateData.title !== undefined) updatePayload.title = updateData.title;
+    if (updateData.description !== undefined) updatePayload.description = updateData.description;
+    if (updateData.estimated_minutes !== undefined) updatePayload.estimated_minutes = Number(updateData.estimated_minutes);
+    if (updateData.order_index !== undefined) updatePayload.order_index = Number(updateData.order_index);
 
     const { data, error } = await supabase
       .from("study_plan_tasks")
@@ -482,11 +655,56 @@ export async function updateTaskStatus(taskId, userId, { status, actualMinutes, 
           return t;
         }
       }
+      return { id: taskId, ...updatePayload };
     }
 
     return data;
   } catch (err) {
     console.error("[StudyPlanner] updateTaskStatus error:", err);
+    throw err;
+  }
+}
+
+/**
+ * 4b. ADD A TASK/TOPIC TO A PLAN OR SPECIFIC DAY
+ */
+export async function addTaskToPlan(planId, userId, taskData = {}) {
+  const taskId = randomUUID();
+  const scheduledDate = taskData.scheduled_date || new Date().toISOString().split("T")[0];
+  const taskRow = {
+    id: taskId,
+    plan_id: planId,
+    user_id: userId,
+    scheduled_date: scheduledDate,
+    day_of_week: taskData.day_of_week || getDayName(scheduledDate),
+    subject: taskData.subject || "Study Subject",
+    topic: taskData.topic || "Custom Topic",
+    subtopic: taskData.subtopic || null,
+    task_type: taskData.task_type || "learning",
+    title: taskData.title || taskData.topic || "Study Session",
+    description: taskData.description || null,
+    document_name: taskData.document_name || "Manually Added",
+    page_reference: taskData.page_reference || null,
+    estimated_minutes: Number(taskData.estimated_minutes) || 60,
+    actual_minutes: 0,
+    status: "pending",
+    notes: null,
+    order_index: taskData.order_index || 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  try {
+    const { data, error } = await supabase.from("study_plan_tasks").insert(taskRow).select().single();
+    if (error && error.code !== "PGRST205") throw error;
+    return data || taskRow;
+  } catch (err) {
+    const plan = memoryStore.get(planId);
+    if (plan) {
+      if (!plan.tasks) plan.tasks = [];
+      plan.tasks.push(taskRow);
+      return taskRow;
+    }
     throw err;
   }
 }

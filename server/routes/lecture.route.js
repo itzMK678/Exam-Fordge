@@ -6,6 +6,7 @@ import {
   handleListLectures,
   handleGetLecture,
   handleDeleteLecture,
+  handleRetryLecture,
   handleLectureChat,
   handleGenerateStudyMaterial,
   handleCreateExamSession,
@@ -21,6 +22,7 @@ router.post("/process-storage", requireAuth, handleProcessStoredLecture);
 router.get("/", requireAuth, handleListLectures);
 router.get("/:id", requireAuth, handleGetLecture);
 router.delete("/:id", requireAuth, handleDeleteLecture);
+router.post("/:id/retry", requireAuth, handleRetryLecture);
 
 // AI Chatbot with lecture grounding and timestamps
 router.post("/:id/chat", requireAuth, handleLectureChat);

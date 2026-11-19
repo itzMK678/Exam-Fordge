@@ -266,17 +266,37 @@ Return ONLY a valid, parseable JSON object with the following structure:
 
     const part = createPartFromUri(uploadedGeminiFile.uri, uploadedGeminiFile.mimeType || detectedMime);
 
-    const modelName = env.geminiGenerationModel || "gemini-3.5-flash-lite";
-    const result = await ai.models.generateContent({
-      model: modelName,
-      contents: [
-        part,
-        { text: systemPrompt },
-      ],
-      config: {
-        responseMimeType: "application/json",
-      },
-    });
+    let result = null;
+    const candidateModels = [
+      env.geminiGenerationModel || "gemini-3.5-flash-lite",
+      env.geminiFallbackModel || "gemini-3.5-flash",
+    ];
+
+    let lastError = null;
+    for (const model of candidateModels) {
+      try {
+        console.log(`[Lecture ${lectureId}] Prompting analysis with model [${model}]...`);
+        result = await ai.models.generateContent({
+          model,
+          contents: [
+            part,
+            { text: systemPrompt },
+          ],
+          config: {
+            responseMimeType: "application/json",
+          },
+        });
+        if (result?.text) break;
+      } catch (genErr) {
+        lastError = genErr;
+        console.warn(`[Lecture ${lectureId}] Model [${model}] failed (${genErr.message}). Waiting 2s before fallback/retry...`);
+        await new Promise((r) => setTimeout(r, 2000));
+      }
+    }
+
+    if (!result?.text) {
+      throw lastError || new Error("All Gemini models failed to generate lecture intelligence.");
+    }
 
     const parsed = cleanAndParseJSON(result.text);
     if (!parsed) {
@@ -482,6 +502,49 @@ export async function deleteLecture(lectureId, userId) {
   }
 
   return true;
+}
+
+/**
+ * Retry processing an existing lecture recording
+ */
+export async function retryLecture(lectureId, userId) {
+  const { data: lecture, error: fetchErr } = await supabase
+    .from("lectures")
+    .select("id, storage_path, filename, status")
+    .eq("id", lectureId)
+    .eq("user_id", String(userId))
+    .single();
+
+  if (fetchErr || !lecture) {
+    throw new Error("Lecture not found or unauthorized.");
+  }
+
+  if (!lecture.storage_path) {
+    throw new Error("Recording file is missing from storage. Please re-upload.");
+  }
+
+  // Set status back to processing
+  const { data: updated, error: updateErr } = await supabase
+    .from("lectures")
+    .update({
+      status: "processing",
+      error_message: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", lectureId)
+    .select()
+    .single();
+
+  if (updateErr) {
+    throw new Error(`Failed to reset lecture status: ${updateErr.message}`);
+  }
+
+  // Trigger background processing asynchronously
+  processLectureInBackground(lectureId, userId).catch((bgErr) => {
+    console.error(`[Background Error] Retry failed for lecture ${lectureId}:`, bgErr);
+  });
+
+  return updated;
 }
 
 /**

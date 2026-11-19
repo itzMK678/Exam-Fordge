@@ -5,6 +5,7 @@ import {
   getLectures,
   getLectureById,
   deleteLecture,
+  retryLecture,
   chatWithLecture,
   generateLectureStudyMaterial,
   createExamSessionFromLecture,
@@ -129,6 +130,25 @@ export async function handleDeleteLecture(req, res, next) {
     return res.status(200).json({
       success: true,
       message: "Lecture and associated resources deleted successfully.",
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Retry lecture processing for an already uploaded recording
+ */
+export async function handleRetryLecture(req, res, next) {
+  try {
+    const userId = req.user?.id;
+    const { id } = req.params;
+
+    const lecture = await retryLecture(id, userId);
+    return res.status(202).json({
+      success: true,
+      message: "Lecture analysis restarted.",
+      data: lecture,
     });
   } catch (err) {
     next(err);

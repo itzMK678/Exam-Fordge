@@ -5,6 +5,8 @@ import {
   handleListStudyPlans,
   handleGetStudyPlan,
   handleCreateStudyPlan,
+  handleAnalyzeTopics,
+  handleAddTaskToPlan,
   handleUpdateTaskStatus,
   handleSmartReschedule,
   handleChatWithAssistant,
@@ -18,10 +20,12 @@ router.use(requireAuth);
 
 router.get("/", handleListStudyPlans);
 router.post("/", uploadDocuments.array("files"), handleCreateStudyPlan);
+router.post("/analyze-topics", uploadDocuments.array("files"), handleAnalyzeTopics);
 router.get("/:id", handleGetStudyPlan);
 router.delete("/:id", handleDeleteStudyPlan);
 
-// Task management
+// Task management & additions
+router.post("/:id/tasks", handleAddTaskToPlan);
 router.patch("/tasks/:taskId", handleUpdateTaskStatus);
 
 // Smart rescheduling
