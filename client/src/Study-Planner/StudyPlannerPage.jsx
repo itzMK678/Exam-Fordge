@@ -167,7 +167,7 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
           {/* Plan Selector or Quick Info */}
           <div className="flex items-center gap-3">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-2xs font-bold text-xs">
-              <Sparkles size={16} />
+              
             </span>
             {plans.length > 0 ? (
               <select
@@ -260,7 +260,7 @@ export default function StudyPlannerPage({ hideNavbar = false }) {
           /* Empty State: Inviting Hero Banner */
           <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-14 my-10">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-indigo-50 text-indigo-600 shadow-xs">
-              <Sparkles size={36} />
+             
             </div>
             <h1 className="text-2xl font-black text-slate-900 sm:text-4xl">
               Turn Your Materials & Syllabus <br />

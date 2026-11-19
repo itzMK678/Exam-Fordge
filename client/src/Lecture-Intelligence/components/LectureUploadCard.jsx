@@ -256,7 +256,7 @@ export default function LectureUploadCard({ onLectureCreated }) {
       {/* Action Buttons */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <span className="text-xs text-slate-400">
-          ✨ Powered by multimodal Gemini audio intelligence
+       Powered by multimodal audio intelligence
         </span>
         <button
           type="button"
@@ -276,7 +276,7 @@ export default function LectureUploadCard({ onLectureCreated }) {
             </>
           ) : (
             <>
-              <Sparkles size={16} />
+              
               <span>Process Recording</span>
             </>
           )}
