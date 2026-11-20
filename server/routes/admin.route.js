@@ -26,6 +26,7 @@ import {
   handleListFeedback,
   handleUpdateFeedback,
   handleSubmitPublicFeedback,
+  handleSubmitComplaint,
   handleGetSettings,
   handleUpdateSettings,
   handleGetActivityLogs,
@@ -41,8 +42,9 @@ router.post("/setup", authLimiter, handleSetupInitialAdmin);
 router.post("/login", authLimiter, handleLogin);
 router.post("/logout", handleLogout);
 
-// Public Feedback Submission (Students can submit feedback)
+// Public Feedback & Complaint Submission
 router.post("/feedback/submit", handleSubmitPublicFeedback);
+router.post("/complaint", handleSubmitComplaint);
 
 // ============================================================
 // PROTECTED ADMIN ROUTES (Requires requireAdmin)

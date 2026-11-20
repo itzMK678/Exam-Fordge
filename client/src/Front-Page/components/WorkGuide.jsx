@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
+import ComplaintSection from './ComplaintSection';
 import {Brain,ArrowRight,
   
   LogIn,
@@ -98,6 +99,8 @@ const WorkGuide = () => {
   })}
 </div>
           
+          <ComplaintSection/>
+
         </div>
       
          <div className="mt-20 bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-10 text-center text-white sm:px-12 sm:py-14">

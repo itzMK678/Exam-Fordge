@@ -7,6 +7,7 @@ import HeroSection from "./components/HeroSection";
 import Feature from "./components/Feature";
 import WorkGuide from "./components/WorkGuide";
 import About from "./components/About";
+import ComplaintSection from "./components/ComplaintSection";
 const mainpage = () => {
   return (
     <>
@@ -15,6 +16,7 @@ const mainpage = () => {
       <About/>
        <Feature/>
       <WorkGuide/>
+      
       <Footer />
     </>
   )

@@ -1,3 +1,6 @@
+import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
+import { sendComplaintEmails } from "../services/email.service.js";
 import {
   getSetupStatus,
   setupInitialAdmin,
@@ -415,6 +418,78 @@ export async function handleSubmitPublicFeedback(req, res, next) {
       success: true,
       message: "Thank you! Your feedback has been received.",
       data,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function handleSubmitComplaint(req, res, next) {
+  try {
+    const { message, email, name } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your complaint message before sending.",
+      });
+    }
+
+    // Resolve user identity from req.user, auth_token cookie, or body
+    let userId = req.user?.id || null;
+    let userName = req.user?.name || name?.trim() || null;
+    let userEmail = req.user?.email || email?.trim() || null;
+
+    if (!userId && req.cookies?.auth_token) {
+      try {
+        const decoded = jwt.verify(req.cookies.auth_token, env.jwtSecret || process.env.JWT_SECRET);
+        if (decoded?.id) {
+          userId = decoded.id;
+          if (!userEmail && decoded.email) userEmail = decoded.email;
+          if (!userName && decoded.name) userName = decoded.name;
+        }
+      } catch (e) {
+        // Fallback to body email
+      }
+    }
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "An email address is required so we can notify you and confirm your complaint.",
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address.",
+      });
+    }
+
+    // 1. Store complaint in Supabase system_feedback
+    const feedback = await createFeedback({
+      userId,
+      userName: userName || userEmail.split("@")[0],
+      userEmail,
+      category: "complaint",
+      rating: 1,
+      message: message.trim(),
+    });
+
+    // 2. Dispatch emails to owner/admin and user
+    const emailResult = await sendComplaintEmails({
+      userEmail,
+      userName: userName || userEmail.split("@")[0],
+      message: message.trim(),
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Your complaint has been submitted successfully. A confirmation copy has been sent to your email.",
+      data: feedback,
+      emailSent: emailResult?.sent !== false,
     });
   } catch (err) {
     next(err);
