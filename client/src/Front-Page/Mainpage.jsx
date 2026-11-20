@@ -1,11 +1,5 @@
 
-import React, { useState } from "react";
-
-import {GraduationCap,FileText,FileCheck,Brain,
-  MessageCircle,ArrowRight,Play,Check,Menu,
-  X,Sparkles,UploadCloud,BookOpen,
-  Target,Zap,Link,
-} from "lucide-react";
+import React from "react";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";

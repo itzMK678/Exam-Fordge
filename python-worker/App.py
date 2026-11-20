@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("examforge-worker")
 
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB limit
-INTERNAL_WORKER_SECRET = os.getenv("INTERNAL_WORKER_SECRET", "").strip()
+INTERNAL_WORKER_SECRET = os.getenv("INTERNAL_WORKER_SECRET", "examforge-internal-microservice-secret-2026").strip()
 
 app = FastAPI(
     title="ExamForge Document Worker",

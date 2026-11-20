@@ -69,5 +69,5 @@ export const env = {
 
   jwtSecret: process.env.JWT_SECRET,
 
-  internalWorkerSecret: process.env.INTERNAL_WORKER_SECRET || "",
+  internalWorkerSecret: process.env.INTERNAL_WORKER_SECRET || "examforge-internal-microservice-secret-2026",
 };

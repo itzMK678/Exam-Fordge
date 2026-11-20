@@ -724,7 +724,6 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     return res.json({
       success: true,
       message: `A 6-digit verification code has been sent to ${normalizedEmail}.`,
-      devCode: emailResult.mode?.includes("dev") ? code : undefined,
     });
   } catch (error) {
     return res.status(500).json({
@@ -813,18 +812,14 @@ router.post("/reset-password", authLimiter, async (req, res) => {
       .maybeSingle();
 
     // 4. Update in Supabase Auth if user exists there
-    try {
-      const { data: authList } = await supabase.auth.admin.listUsers();
-      const authUser = authList?.users?.find(
-        (u) => u.email?.toLowerCase() === normalizedEmail
-      );
-      if (authUser) {
-        await supabase.auth.admin.updateUserById(authUser.id, {
+    if (updatedUser?.id) {
+      try {
+        await supabase.auth.admin.updateUserById(updatedUser.id, {
           password: newPassword,
         });
+      } catch (authErr) {
+        console.warn("[Auth] Notice updating Supabase auth password:", authErr.message);
       }
-    } catch (authErr) {
-      console.warn("[Auth] Notice updating Supabase auth password:", authErr.message);
     }
 
     // 5. Generate session token for auto-login

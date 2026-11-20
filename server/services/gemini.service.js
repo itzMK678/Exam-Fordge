@@ -164,28 +164,21 @@ export async function generateContentWithRetry({
     config.responseSchema = responseSchema;
   }
 
-  let currentModel = env.geminiGenerationModel;
+  const candidateModels = [
+    env.geminiGenerationModel,
+    env.geminiFallbackModel,
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+  ].filter(Boolean);
+  const modelChain = [...new Set(candidateModels)];
 
   for (
     let attempt = 1;
     attempt <= maxRetries;
     attempt++
   ) {
-    /**
-     * Switch to fallback model after the first failed
-     * attempt if a fallback model is configured.
-     */
-    if (
-      attempt >= 2 &&
-      env.geminiFallbackModel &&
-      currentModel !== env.geminiFallbackModel
-    ) {
-      console.warn(
-        `[Gemini] Primary model busy/unavailable. Switching to fallback model: ${env.geminiFallbackModel}`
-      );
-
-      currentModel = env.geminiFallbackModel;
-    }
+    const modelIndex = Math.min(attempt - 1, modelChain.length - 1);
+    const currentModel = modelChain[modelIndex];
 
     try {
       console.log(
@@ -446,21 +439,19 @@ export async function* streamTextContent({
   }, 20000);
 
   try {
-    let currentModel = env.geminiGenerationModel;
+    const candidateModels = [
+      env.geminiGenerationModel,
+      env.geminiFallbackModel,
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+    ].filter(Boolean);
+    const modelChain = [...new Set(candidateModels)];
     const maxRetries = 3;
     let responseStream = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      if (
-        attempt >= 2 &&
-        env.geminiFallbackModel &&
-        currentModel !== env.geminiFallbackModel
-      ) {
-        console.warn(
-          `[Gemini Stream] Switching to fallback model: ${env.geminiFallbackModel}`
-        );
-        currentModel = env.geminiFallbackModel;
-      }
+      const modelIndex = Math.min(attempt - 1, modelChain.length - 1);
+      const currentModel = modelChain[modelIndex];
 
       try {
         console.log(

@@ -89,6 +89,13 @@ export async function getExamJobStatusController(req, res) {
       });
     }
 
+    if (job.userId && req.user?.id && job.userId !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You do not own this exam generation job.",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       job,

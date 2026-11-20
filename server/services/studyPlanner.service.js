@@ -92,17 +92,22 @@ export async function listStudyPlans(userId) {
  */
 export async function getStudyPlan(planId, userId) {
   try {
-    const { data: plan, error } = await supabase
+    let query = supabase
       .from("study_plans")
       .select("*")
-      .eq("id", planId)
-      .maybeSingle();
+      .eq("id", planId);
+
+    if (userId) {
+      query = query.eq("user_id", String(userId));
+    }
+
+    const { data: plan, error } = await query.maybeSingle();
 
     if (error && error.code !== "PGRST205") throw error;
 
     if (!plan) {
       const memPlan = memoryStore.get(planId);
-      if (memPlan && memPlan.user_id === userId) {
+      if (memPlan && (!userId || memPlan.user_id === String(userId))) {
         return memPlan;
       }
       return null;
@@ -637,10 +642,16 @@ export async function updateTaskStatus(taskId, userId, updateData = {}) {
     if (updateData.estimated_minutes !== undefined) updatePayload.estimated_minutes = Number(updateData.estimated_minutes);
     if (updateData.order_index !== undefined) updatePayload.order_index = Number(updateData.order_index);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("study_plan_tasks")
       .update(updatePayload)
-      .eq("id", taskId)
+      .eq("id", taskId);
+
+    if (userId) {
+      query = query.eq("user_id", String(userId));
+    }
+
+    const { data, error } = await query
       .select("*")
       .maybeSingle();
 
@@ -875,16 +886,27 @@ Role Guidelines:
   ];
 
   try {
-    const response = await ai.models.generateContent({
-      model: GENERATION_MODEL,
-      contents: [
-        { text: contextPrompt },
-        ...history.slice(-6).map((h) => ({
-          text: `${h.role === "user" ? "Student" : "Assistant"}: ${h.content}`,
-        })),
-        { text: `Student: ${message}` },
-      ],
-    });
+    let response;
+    const contentsPayload = [
+      { text: contextPrompt },
+      ...history.slice(-6).map((h) => ({
+        text: `${h.role === "user" ? "Student" : "Assistant"}: ${h.content}`,
+      })),
+      { text: `Student: ${message}` },
+    ];
+
+    try {
+      response = await ai.models.generateContent({
+        model: GENERATION_MODEL,
+        contents: contentsPayload,
+      });
+    } catch (primaryErr) {
+      console.warn(`[StudyAssistant] Primary model failed (${primaryErr.message}), falling back to ${FALLBACK_MODEL}...`);
+      response = await ai.models.generateContent({
+        model: FALLBACK_MODEL,
+        contents: contentsPayload,
+      });
+    }
 
     const reply = response.text;
 

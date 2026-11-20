@@ -258,31 +258,38 @@ export async function generateExam(
     documents,
   });
 
-  // Parallel generation across documents for high performance
-  const generationPromises = documents.map(async (document) => {
-    const docAllocation = allocations.find(
-      (item) => item.documentId === document.id
+  // Process documents with controlled concurrency (max 2 at once) to avoid Gemini 503/429 rate limit spikes
+  const questionBatches = [];
+  const CONCURRENCY = 2;
+  for (let i = 0; i < documents.length; i += CONCURRENCY) {
+    const chunk = documents.slice(i, i + CONCURRENCY);
+    const chunkResults = await Promise.all(
+      chunk.map(async (document) => {
+        const docAllocation = allocations.find(
+          (item) => item.documentId === document.id
+        );
+
+        const mcqCountForDoc = docAllocation?.mcqCount || 0;
+        const shortCountForDoc = docAllocation?.shortCount || 0;
+        const longCountForDoc = docAllocation?.longCount || 0;
+
+        if (mcqCountForDoc + shortCountForDoc + longCountForDoc === 0) {
+          return [];
+        }
+
+        return await generateForDocument({
+          document,
+          mcqCount: mcqCountForDoc,
+          shortCount: shortCountForDoc,
+          longCount: longCountForDoc,
+          difficulty,
+          focusTopics,
+        });
+      })
     );
+    questionBatches.push(...chunkResults);
+  }
 
-    const mcqCountForDoc = docAllocation?.mcqCount || 0;
-    const shortCountForDoc = docAllocation?.shortCount || 0;
-    const longCountForDoc = docAllocation?.longCount || 0;
-
-    if (mcqCountForDoc + shortCountForDoc + longCountForDoc === 0) {
-      return [];
-    }
-
-    return await generateForDocument({
-      document,
-      mcqCount: mcqCountForDoc,
-      shortCount: shortCountForDoc,
-      longCount: longCountForDoc,
-      difficulty,
-      focusTopics,
-    });
-  });
-
-  const questionBatches = await Promise.all(generationPromises);
   const allQuestions = questionBatches.flat();
 
   // Clean and prepare final question list

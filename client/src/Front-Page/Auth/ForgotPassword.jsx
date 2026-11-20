@@ -71,10 +71,6 @@ export default function ForgotPassword() {
       }
 
       setSuccessMsg(json.message);
-      if (json.devCode) {
-        setDevCode(json.devCode);
-        setCode(json.devCode); // prefill in dev mode
-      }
       setResendCooldown(60);
       setStep(2);
     } catch (err) {

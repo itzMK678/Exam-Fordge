@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import {
   
@@ -8,9 +8,10 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Navbar from "../Front-Page/components/Navbar";
-import UploadPage from "./UploadPage";
-import DailyLecturePage from "../Lecture-Intelligence/DailyLecturePage";
-import StudyPlannerPage from "../Study-Planner/StudyPlannerPage";
+
+const UploadPage = lazy(() => import("./UploadPage"));
+const DailyLecturePage = lazy(() => import("../Lecture-Intelligence/DailyLecturePage"));
+const StudyPlannerPage = lazy(() => import("../Study-Planner/StudyPlannerPage"));
 
 export default function WorkPage({ defaultTab = "exam" }) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -214,41 +215,49 @@ export default function WorkPage({ defaultTab = "exam" }) {
           DYNAMIC WORKSPACE CONTENT (Renders the selected tool)
       ========================================================================= */}
       <main className="flex-1 w-full">
-        {activeTab === "exam" && (
-          <div
-            id="panel-exam"
-            role="tabpanel"
-            aria-labelledby="tab-exam"
-            tabIndex={0}
-            className="w-full focus:outline-none"
-          >
-            <UploadPage hideNavbar={true} />
-          </div>
-        )}
+        <Suspense
+          fallback={
+            <div className="flex justify-center items-center py-24">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+            </div>
+          }
+        >
+          {activeTab === "exam" && (
+            <div
+              id="panel-exam"
+              role="tabpanel"
+              aria-labelledby="tab-exam"
+              tabIndex={0}
+              className="w-full focus:outline-none"
+            >
+              <UploadPage hideNavbar={true} />
+            </div>
+          )}
 
-        {activeTab === "lecture" && (
-          <div
-            id="panel-lecture"
-            role="tabpanel"
-            aria-labelledby="tab-lecture"
-            tabIndex={0}
-            className="w-full focus:outline-none"
-          >
-            <DailyLecturePage hideNavbar={true} />
-          </div>
-        )}
+          {activeTab === "lecture" && (
+            <div
+              id="panel-lecture"
+              role="tabpanel"
+              aria-labelledby="tab-lecture"
+              tabIndex={0}
+              className="w-full focus:outline-none"
+            >
+              <DailyLecturePage hideNavbar={true} />
+            </div>
+          )}
 
-        {activeTab === "planner" && (
-          <div
-            id="panel-planner"
-            role="tabpanel"
-            aria-labelledby="tab-planner"
-            tabIndex={0}
-            className="w-full focus:outline-none"
-          >
-            <StudyPlannerPage hideNavbar={true} />
-          </div>
-        )}
+          {activeTab === "planner" && (
+            <div
+              id="panel-planner"
+              role="tabpanel"
+              aria-labelledby="tab-planner"
+              tabIndex={0}
+              className="w-full focus:outline-none"
+            >
+              <StudyPlannerPage hideNavbar={true} />
+            </div>
+          )}
+        </Suspense>
       </main>
     </div>
   );

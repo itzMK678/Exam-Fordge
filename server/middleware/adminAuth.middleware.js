@@ -53,13 +53,15 @@ export async function requireAdmin(req, res, next) {
       console.error("[Admin Auth] Database error:", error.message);
     }
 
+    if (!admin) {
+      return res.status(401).json({
+        success: false,
+        message: "Admin account no longer exists or session is invalid.",
+      });
+    }
+
     // Attach verified admin to request
-    req.admin = admin || {
-      id: decoded.adminId,
-      username: decoded.username || "admin",
-      email: decoded.email,
-      role: "admin",
-    };
+    req.admin = admin;
 
     next();
   } catch (error) {

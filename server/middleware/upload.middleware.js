@@ -3,6 +3,7 @@ import os from "os";
 import crypto from "crypto";
 import {
   ALLOWED_EXTENSIONS,
+  ALLOWED_MIME_TYPES,
   getFileExtension,
   sanitizeFilename,
 } from "../utils/file.utils.js";
@@ -28,6 +29,14 @@ const fileFilter = (req, file, cb) => {
     return cb(
       new Error(
         `Unsupported file type: ${extension || "unknown"}. Only PDF (.pdf) and Word (.docx) files are allowed.`
+      )
+    );
+  }
+
+  if (file.mimetype && !ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    return cb(
+      new Error(
+        `Unsupported MIME type: ${file.mimetype}. Only PDF and DOCX files are allowed.`
       )
     );
   }

@@ -117,6 +117,19 @@ export async function saveDiscussion({
   questionText,
   messages,
 }) {
+  if (examId) {
+    const { data: session } = await supabase
+      .from("exam_sessions")
+      .select("id")
+      .eq("id", examId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!session) {
+      throw new Error("Exam session not found or access denied.");
+    }
+  }
+
   const encryptedMessages = encrypt(JSON.stringify(messages), userId);
 
   const { data, error } = await supabase

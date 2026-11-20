@@ -58,7 +58,7 @@ export async function summarizeDocument(documentId, userId) {
       throw new Error("Document not found.");
     }
 
-    if (doc.user_id && doc.user_id !== String(userId)) {
+    if (!doc.user_id || doc.user_id !== String(userId)) {
       throw new Error("Access denied: You do not have permission to view this document.");
     }
   }
@@ -93,7 +93,7 @@ export async function* summarizeDocumentStream(documentId, signal, userId) {
       throw new Error("Document not found.");
     }
 
-    if (doc.user_id && doc.user_id !== String(userId)) {
+    if (!doc.user_id || doc.user_id !== String(userId)) {
       throw new Error("Access denied: You do not have permission to view this document.");
     }
   }
