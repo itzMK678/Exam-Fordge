@@ -127,7 +127,7 @@ const ComplaintSection = () => {
             </div>
           ) : (
             <div className="mb-3">
-              <label htmlFor="complaint-guest-email" className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label htmlFor="complaint-guest-email" className="block text-xs font-medium text-slate-400 bg-white mb-1.5">
                 Your Email Address (for confirmation receipt):
               </label>
               <input
